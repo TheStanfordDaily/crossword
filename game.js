@@ -674,6 +674,7 @@ function showWinModal() {
   winAuthor.textContent = puzzle.author ? `by ${puzzle.author}` : '';
   winTime.textContent   = formatTime(timerElapsed);
   winModal.classList.add('open');
+  document.getElementById('header-share-btn').style.display = '';
 }
 
 // ── Reset ──────────────────────────────────────────────────────
@@ -751,6 +752,8 @@ document.getElementById('menu-reset').addEventListener('click', () => {
 helpBtn.addEventListener('click', () => helpModal.classList.add('open'));
 helpCloseBtn.addEventListener('click', () => helpModal.classList.remove('open'));
 helpModal.addEventListener('click', e => { if (e.target === helpModal) helpModal.classList.remove('open'); });
+
+document.getElementById('header-share-btn').addEventListener('click', () => showWinModal());
 
 winCloseBtn.addEventListener('click', () => winModal.classList.remove('open'));
 winModal.addEventListener('click', e => { if (e.target === winModal) winModal.classList.remove('open'); });
@@ -906,6 +909,7 @@ function initGame(puz) {
     updateCompletedClues();
     if (solved) {
       stopTimer();
+      document.getElementById('header-share-btn').style.display = '';
     }
   }
 
