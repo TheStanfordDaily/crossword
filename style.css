@@ -574,40 +574,36 @@ body {
   flex-shrink: 0;
 }
 
-/* ── Puzzle Logo (header image) ──────────────────────────────── */
-#puzzle-logo {
-  height: 30px;
+/* ── Puzzle Banner ───────────────────────────────────────────── */
+#puzzle-banner {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  padding: 0.65rem 1.25rem;
+  background: var(--cardinal);
+  border-bottom: 2px solid var(--cardinal-dark);
+  flex-shrink: 0;
+}
+
+#puzzle-banner.visible {
+  display: flex;
+}
+
+#banner-logo {
+  height: 28px;
   width: auto;
   object-fit: contain;
-  display: none;
-  border-radius: 4px;
-  flex-shrink: 0;
-}
-
-#puzzle-logo.visible {
   display: block;
 }
 
-/* When logo is shown, hide the text title */
-#header:has(#puzzle-logo.visible) #puzzle-title {
-  display: none;
-}
-
-/* ── Puzzle Footer ────────────────────────────────────────────── */
-#puzzle-footer {
-  display: none;
-  text-align: center;
-  padding: 0.5rem 1rem 0.6rem;
-  font-family: var(--sans);
-  font-size: 0.8rem;
-  color: #666;
-  background: var(--panel-bg);
-  border-top: 1px solid #ddd;
-  flex-shrink: 0;
-}
-
-#puzzle-footer.visible {
-  display: block;
+#banner-number {
+  font-family: var(--serif);   /* Georgia */
+  font-size: 1.1rem;
+  font-weight: 400;
+  color: #ffffff;
+  letter-spacing: 0.01em;
+  line-height: 1;
 }
 
 /* ── Embed Mode ──────────────────────────────────────────────── */

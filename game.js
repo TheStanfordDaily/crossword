@@ -25,8 +25,9 @@ const acrossListEl  = document.getElementById('across-list');
 const downListEl    = document.getElementById('down-list');
 const activeClueBar = document.getElementById('active-clue-bar');
 const scrambleWarn  = document.getElementById('scramble-warning');
-const puzzleLogo    = document.getElementById('puzzle-logo');
-const puzzleFooter  = document.getElementById('puzzle-footer');
+const puzzleBanner  = document.getElementById('puzzle-banner');
+const bannerLogo    = document.getElementById('banner-logo');
+const bannerNumber  = document.getElementById('banner-number');
 const winModal      = document.getElementById('win-modal');
 const winTitle      = document.getElementById('win-title');
 const winAuthor     = document.getElementById('win-author');
@@ -843,23 +844,15 @@ document.addEventListener('DOMContentLoaded', async () => {
   const puzzleType = params.get('type'); // 'dimi' | 'crossword'
   const puzzleNum  = params.get('num');  // e.g. '139'
 
-  // Set logo and footer if type param is present
+  // Populate banner when type param is present
   if (puzzleType) {
-    const logoSrc = puzzleType === 'dimi'
-      ? 'assets/dailydimi.png'
-      : 'assets/dailycrossword.png';
-    const typeName = puzzleType === 'dimi'
-      ? 'Daily Diminutive'
-      : 'Daily Crossword';
+    const logoSrc  = puzzleType === 'dimi' ? 'assets/dailydimi.png' : 'assets/dailycrossword.png';
+    const typeName = puzzleType === 'dimi' ? 'Daily Diminutive' : 'Daily Crossword';
 
-    puzzleLogo.src = logoSrc;
-    puzzleLogo.alt = typeName;
-    puzzleLogo.classList.add('visible');
-
-    if (puzzleNum) {
-      puzzleFooter.textContent = `${typeName} #${puzzleNum}`;
-      puzzleFooter.classList.add('visible');
-    }
+    bannerLogo.src = logoSrc;
+    bannerLogo.alt = typeName;
+    if (puzzleNum) bannerNumber.textContent = `#${puzzleNum}`;
+    puzzleBanner.classList.add('visible');
   }
 
   if (embedMode) {

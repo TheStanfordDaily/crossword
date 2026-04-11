@@ -31,9 +31,14 @@
   <!-- ── App (shown once puzzle is loaded) ───────────────────── -->
   <div id="app" role="main" aria-label="Crossword puzzle">
 
+    <!-- Puzzle banner (shown when ?type + ?num params are present) -->
+    <div id="puzzle-banner" aria-label="Puzzle heading">
+      <img id="banner-logo" src="" alt="">
+      <span id="banner-number"></span>
+    </div>
+
     <!-- Header -->
     <header id="header">
-      <img id="puzzle-logo" src="" alt="" aria-hidden="true">
       <span id="puzzle-title" aria-label="Puzzle title"></span>
       <span id="timer" aria-label="Elapsed time" aria-live="off">00:00</span>
 
@@ -92,8 +97,6 @@
 
     </div><!-- /puzzle-area -->
 
-    <!-- Footer (shown when ?type and ?num params are present) -->
-    <div id="puzzle-footer" aria-label="Puzzle info"></div>
 
   </div><!-- /app -->
 
