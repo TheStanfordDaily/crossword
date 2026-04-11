@@ -866,17 +866,6 @@ function initGame(puz) {
   document.removeEventListener('keydown', handleKeyDown);
   document.addEventListener('keydown', handleKeyDown);
 
-  // In embed mode, notify the parent iframe of our natural content height
-  if (document.body.classList.contains('embed-mode')) {
-    const postHeight = () => {
-      window.parent.postMessage(
-        { type: 'crossword-resize', height: document.documentElement.scrollHeight },
-        '*'
-      );
-    };
-    postHeight();
-    new ResizeObserver(postHeight).observe(document.documentElement);
-  }
 }
 
 // ── URL Params & Boot ──────────────────────────────────────────
