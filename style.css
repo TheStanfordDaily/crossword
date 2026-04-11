@@ -479,7 +479,7 @@ kbd {
 
 /* ── Clue Panel ──────────────────────────────────────────────── */
 #clue-panel {
-  flex: 0 0 280px;      /* fixed width — never grows or shrinks */
+  flex: 0 0 220px;      /* fixed width — never grows or shrinks */
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -784,7 +784,7 @@ body.embed-mode #active-clue-bar {
 
 /* Clue panel: fixed 280 px wide, stretches to full puzzle-area height */
 body.embed-mode #clue-panel {
-  flex: 0 0 280px;
+  flex: 0 0 220px;
   height: auto;        /* let align-items:stretch do the work */
   overflow: hidden;
   border-left: 1px solid #ccc;
