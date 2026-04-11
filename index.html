@@ -32,15 +32,6 @@
   <!-- ── App (shown once puzzle is loaded) ───────────────────── -->
   <div id="app" role="main" aria-label="Crossword puzzle">
 
-    <!-- Puzzle banner (shown when ?type + ?num params are present) -->
-    <div id="puzzle-banner" aria-label="Puzzle heading">
-      <div id="banner-top">
-        <img id="banner-logo" src="" alt="">
-        <span id="banner-number"></span>
-      </div>
-      <div id="banner-author"></div>
-    </div>
-
     <!-- Header -->
     <header id="header">
       <span id="puzzle-title" aria-label="Puzzle title"></span>
@@ -78,6 +69,14 @@
 
       <!-- Grid -->
       <div id="grid-wrapper">
+        <!-- Puzzle banner (shown when ?type + ?num params are present) -->
+        <div id="puzzle-banner" aria-label="Puzzle heading">
+          <div id="banner-top">
+            <img id="banner-logo" src="" alt="">
+            <span id="banner-number"></span>
+          </div>
+          <div id="banner-author"></div>
+        </div>
         <div id="grid-container" aria-label="Crossword grid" role="grid"></div>
       </div>
 
