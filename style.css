@@ -367,6 +367,16 @@ kbd {
   overflow: auto;
 }
 
+#grid-footer {
+  font-size: 0.65rem;
+  color: var(--border-color);
+  letter-spacing: 0.08em;
+  padding: 10px 14px 14px 0;
+  opacity: 0.6;
+  width: 100%;
+  text-align: right;
+}
+
 #grid-container {
   display: grid;
   border: 2px solid var(--border-color);
@@ -743,19 +753,10 @@ kbd {
 }
 
 /* ── Embed Mode ──────────────────────────────────────────────── */
-body.embed-mode #load-screen {
-  display: none !important;
-}
+body.embed-mode #load-screen { display: none !important; }
+body.embed-mode #puzzle-title { display: none; }
+body.embed-mode #active-clue-bar { display: none; }
 
-/* In embed mode, hide the text title (banner already shows puzzle info)
-   but keep the timer, help, and menu visible */
-body.embed-mode #puzzle-title {
-  display: none;
-}
-
-/* Embed mode overrides — high specificity so these beat the mobile media query */
-
-/* Lock body to iframe height so the flex height chain works at any viewport width */
 body.embed-mode {
   height: 100vh;
   overflow: hidden;
@@ -767,133 +768,348 @@ body.embed-mode #app {
   border-radius: 8px;
 }
 
-/* Force side-by-side layout */
-body.embed-mode #puzzle-area {
-  flex-direction: row;
-  overflow: hidden;
-}
-
-/* Grid fills remaining width; sits at the top */
-body.embed-mode #grid-wrapper {
-  flex: 1;
-  overflow: auto;
-  align-self: flex-start;
-}
-
-body.embed-mode #active-clue-bar {
-  display: none;
-}
-
-/* Clue panel: fixed 280 px wide, stretches to full puzzle-area height */
-body.embed-mode #clue-panel {
-  flex: 0 0 200px;
-  height: auto;        /* let align-items:stretch do the work */
-  overflow: hidden;
-  border-left: 1px solid #ccc;
-  border-top: none;
-  min-height: 0;
-  display: flex;
-  flex-direction: column;
-}
-
-body.embed-mode #clue-tabs {
-  display: none;
-}
-
-/* Both sections visible, each taking half the panel height */
-body.embed-mode #across-section,
-body.embed-mode #down-section {
-  display: flex;
-  flex: 1;
-  min-height: 0;
-  flex-direction: column;
-  overflow: hidden;
-}
-
-/* Clue list scrolls within its section */
-body.embed-mode .clue-list {
-  flex: 1;
-  min-height: 0;
-  overflow-y: auto;
-}
-
-body.embed-mode .clue-section-header {
-  display: block;
-  flex-shrink: 0;
-}
-
-/* ── Media Queries (Mobile ≤ 640px) ─────────────────────────── */
-@media (max-width: 640px) {
-  html, body {
-    overflow: auto;
-    height: auto;
+/* Desktop-only embed layout (≥769px): side-by-side grid + clue panel */
+@media (min-width: 769px) {
+  body.embed-mode #puzzle-area {
+    flex-direction: row;
+    overflow: hidden;
   }
 
+  body.embed-mode #grid-wrapper {
+    flex: 1;
+    overflow: auto;
+    align-self: flex-start;
+  }
+
+  body.embed-mode #clue-panel {
+    flex: 0 0 200px;
+    height: auto;
+    overflow: hidden;
+    border-left: 1px solid #ccc;
+    border-top: none;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+  }
+
+  body.embed-mode #clue-tabs { display: none; }
+
+  body.embed-mode #across-section,
+  body.embed-mode #down-section {
+    display: flex;
+    flex: 1;
+    min-height: 0;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  body.embed-mode .clue-list {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+  }
+
+  body.embed-mode .clue-section-header {
+    display: block;
+    flex-shrink: 0;
+  }
+
+  body.embed-mode #mobile-clue-nav,
+  body.embed-mode #mobile-keyboard { display: none; }
+}
+
+/* ── Mobile clue navigator (hidden on desktop) ───────────────── */
+#mobile-clue-nav {
+  display: none;
+}
+
+#mobile-keyboard {
+  display: none;
+}
+
+/* ── Mobile Layout (≤ 768px or .is-mobile class set by JS) ─────── */
+@media (max-width: 768px) {
+  html {
+    height: 100%;
+    overflow: hidden;
+  }
+
+  body {
+    height: 100vh;       /* fallback for old browsers */
+    height: 100dvh;      /* dynamic viewport: excludes browser chrome on iOS/Android */
+    overflow: hidden;
+  }
+
+  #app {
+    height: 100vh;       /* fallback */
+    height: 100dvh;
+    overflow: hidden;
+  }
+
+  /* Hide desktop clue panel — replaced by mobile nav + keyboard */
+  #clue-panel,
+  #active-clue-bar {
+    display: none;
+  }
+
+  /* Puzzle area centers the grid vertically with breathing room */
   #puzzle-area {
     flex-direction: column;
-    overflow: auto;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    flex: 1;
+    min-height: 0;
+    padding: 10px 0;
   }
 
+  /* Grid wrapper is exactly grid-sized (no extra height), centered */
   #grid-wrapper {
-    padding: 0.5rem;
-    flex-shrink: 0;
-    justify-content: center;
+    flex: none;
+    padding: 0;
+    overflow: hidden;
+    /* Size the wrapper to fit the grid: min of full-width vs height-available×(cols/rows).
+       --puzzle-cols / --puzzle-rows set by JS after puzzle loads. */
+    width: min(100%, calc((100dvh - 320px) * var(--puzzle-cols, 15) / var(--puzzle-rows, 15)));
   }
 
   #grid-container {
-    max-width: 100%;
     width: 100%;
   }
 
-  #active-clue-bar {
-    display: block;
-  }
-
-  #clue-panel {
-    border-left: none;
-    border-top: 1px solid #ccc;
-    flex: 1;
-    min-height: 200px;
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
-  }
-
-  #clue-tabs {
-    display: flex;
-  }
-
-  /* On mobile, only one section visible at a time */
-  #across-section,
-  #down-section {
-    display: none;
-    flex: 1;
-    min-height: 0;
-    overflow: hidden;
-  }
-
-  #across-section.tab-active,
-  #down-section.tab-active {
-    display: flex;
-    flex-direction: column;
-  }
-
-  #across-section {
-    border-bottom: none;
-  }
-
-  .clue-section-header {
+  #grid-footer {
     display: none;
   }
 
-  /* On mobile clue-list fills the tab panel */
-  .clue-list {
-    overflow-y: auto;
-    flex: 1;
-    padding-top: 0.25rem;
+  /* ── Mobile clue navigator ─────────────────────────── */
+  #mobile-clue-nav {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    background: var(--active-word);
+    border-top: 1px solid var(--cardinal-mid, #ddd);
+    border-bottom: 1px solid var(--cardinal-mid, #ddd);
+    flex-shrink: 0;
+    min-height: 52px;
   }
 
-  #clue-panel {
-    max-width: none;
+  #mobile-prev,
+  #mobile-next {
+    background: none;
+    border: none;
+    color: var(--cardinal);
+    font-size: 2rem;
+    line-height: 1;
+    padding: 0 0.75rem;
+    cursor: pointer;
+    flex-shrink: 0;
+    height: 100%;
+    display: flex;
+    align-items: center;
   }
+
+  #mobile-prev:active,
+  #mobile-next:active {
+    background: rgba(0,0,0,0.07);
+  }
+
+  #mobile-clue-display {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.1rem;
+    padding: 0.4rem 0;
+    min-width: 0;
+  }
+
+  #mobile-clue-label {
+    font-family: var(--sans);
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--cardinal);
+  }
+
+  #mobile-clue-text {
+    font-family: var(--serif);
+    font-size: 0.88rem;
+    line-height: 1.35;
+    color: #1a1a1a;
+  }
+
+  /* ── Mobile keyboard ───────────────────────────────── */
+  #mobile-keyboard {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    padding: 6px 4px 8px;
+    padding-bottom: calc(8px + env(safe-area-inset-bottom, 0px));
+    background: #d1d5db;
+    flex-shrink: 0;
+  }
+
+  .kb-row {
+    display: flex;
+    justify-content: center;
+    gap: 5px;
+  }
+
+  .kb-key {
+    flex: 1;
+    max-width: 36px;
+    height: 42px;
+    background: #fff;
+    border: none;
+    border-radius: 5px;
+    box-shadow: 0 1px 0 rgba(0,0,0,0.35);
+    font-family: var(--sans);
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: #1a1a1a;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .kb-key:active {
+    background: #b0b7bf;
+    box-shadow: none;
+    transform: translateY(1px);
+  }
+
+  .kb-back {
+    max-width: 52px;
+    font-size: 1.1rem;
+    background: #adb5bd;
+    color: #1a1a1a;
+  }
+
+  .kb-back:active {
+    background: #8a9199;
+  }
+}
+
+/* ── JS-class fallback (body.is-mobile added when window.innerWidth ≤ 768) ─ */
+/* Mirrors the critical visibility rules from the media query above            */
+body.is-mobile #clue-panel,
+body.is-mobile #active-clue-bar { display: none; }
+
+body.is-mobile #puzzle-area {
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  flex: 1;
+  min-height: 0;
+  padding: 10px 0;
+}
+
+body.is-mobile #grid-wrapper {
+  flex: none;
+  padding: 0;
+  overflow: hidden;
+  width: min(100%, calc((100dvh - 320px) * var(--puzzle-cols, 15) / var(--puzzle-rows, 15)));
+}
+
+body.is-mobile #grid-container {
+  width: 100%;
+}
+
+body.is-mobile #grid-footer { display: none; }
+
+body.is-mobile #mobile-clue-nav {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  background: var(--active-word);
+  border-top: 1px solid #ddd;
+  border-bottom: 1px solid #ddd;
+  flex-shrink: 0;
+  min-height: 52px;
+}
+
+body.is-mobile #mobile-prev,
+body.is-mobile #mobile-next {
+  background: none;
+  border: none;
+  color: var(--cardinal);
+  font-size: 2rem;
+  line-height: 1;
+  padding: 0 0.75rem;
+  cursor: pointer;
+  flex-shrink: 0;
+  height: 100%;
+  display: flex;
+  align-items: center;
+}
+
+body.is-mobile #mobile-clue-display {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  padding: 0.4rem 0;
+  min-width: 0;
+}
+
+body.is-mobile #mobile-clue-label {
+  font-family: var(--sans);
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--cardinal);
+}
+
+body.is-mobile #mobile-clue-text {
+  font-family: var(--serif);
+  font-size: 0.88rem;
+  line-height: 1.35;
+  color: #1a1a1a;
+}
+
+body.is-mobile #mobile-keyboard {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  padding: 6px 4px 8px;
+  padding-bottom: calc(8px + env(safe-area-inset-bottom, 0px));
+  background: #d1d5db;
+  flex-shrink: 0;
+}
+
+body.is-mobile .kb-row {
+  display: flex;
+  justify-content: center;
+  gap: 5px;
+}
+
+body.is-mobile .kb-key {
+  flex: 1;
+  max-width: 36px;
+  height: 42px;
+  background: #fff;
+  border: none;
+  border-radius: 5px;
+  box-shadow: 0 1px 0 rgba(0,0,0,0.35);
+  font-family: var(--sans);
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #1a1a1a;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+body.is-mobile .kb-back {
+  max-width: 52px;
+  font-size: 1.1rem;
+  background: #adb5bd;
 }

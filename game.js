@@ -6,6 +6,16 @@
 
 import { parsePuz } from './puz-parser.js';
 
+// ── Mobile detection ───────────────────────────────────────────
+// Belt-and-suspenders: CSS media query handles most cases;
+// this class-based fallback catches edge cases where the media
+// query misfires (e.g. Chrome "desktop site" mode, unusual viewport).
+function applyMobileClass() {
+  document.body.classList.toggle('is-mobile', window.innerWidth <= 768);
+}
+applyMobileClass();
+window.addEventListener('resize', applyMobileClass, { passive: true });
+
 // ── DOM references ─────────────────────────────────────────────
 const loadScreen    = document.getElementById('load-screen');
 const dropZone      = document.getElementById('drop-zone');
@@ -43,8 +53,13 @@ const winCloseBtn   = document.getElementById('win-close-btn');
 const resetModal    = document.getElementById('reset-modal');
 const resetConfBtn  = document.getElementById('reset-confirm-btn');
 const resetCancelBtn= document.getElementById('reset-cancel-btn');
-const clueTabAcross = document.getElementById('clue-tab-across');
-const clueTabDown   = document.getElementById('clue-tab-down');
+const clueTabAcross    = document.getElementById('clue-tab-across');
+const clueTabDown      = document.getElementById('clue-tab-down');
+const mobilePrevBtn    = document.getElementById('mobile-prev');
+const mobileNextBtn    = document.getElementById('mobile-next');
+const mobileClueLabel  = document.getElementById('mobile-clue-label');
+const mobileClueText   = document.getElementById('mobile-clue-text');
+const mobileKeyboard   = document.getElementById('mobile-keyboard');
 
 // ── Game State ─────────────────────────────────────────────────
 let puzzle = null;           // PuzzleObject from parsePuz
@@ -183,6 +198,9 @@ function restoreState() {
 function renderGrid() {
   gridContainer.innerHTML = '';
   gridContainer.style.gridTemplateColumns = `repeat(${puzzle.width}, 1fr)`;
+  // CSS variables used by mobile to size the grid to fit both width and height.
+  document.documentElement.style.setProperty('--puzzle-cols', puzzle.width);
+  document.documentElement.style.setProperty('--puzzle-rows', puzzle.height);
 
   cellElements = Array.from({ length: puzzle.height }, () => Array(puzzle.width).fill(null));
 
@@ -274,6 +292,7 @@ function setSelection(row, col, dir) {
   selection = { row, col, dir };
   applySelectionHighlights();
   updateActiveClueBar();
+  updateMobileClue();
 }
 
 function highlightActiveClue(dir, num) {
@@ -291,6 +310,17 @@ function updateActiveClueBar() {
   const clue = clueList.find(c => c.number === num);
   if (clue) {
     activeClueBar.textContent = `${num} ${selection.dir === 'across' ? 'Across' : 'Down'}: ${clue.text}`;
+  }
+}
+
+function updateMobileClue() {
+  const num = activeClueNumber();
+  if (num === null) { mobileClueLabel.textContent = ''; mobileClueText.textContent = ''; return; }
+  const dirLabel = selection.dir === 'across' ? 'Across' : 'Down';
+  const clue = puzzle.clues[selection.dir].find(c => c.number === num);
+  if (clue) {
+    mobileClueLabel.textContent = `${num} ${dirLabel}`;
+    mobileClueText.textContent  = clue.text;
   }
 }
 
@@ -742,17 +772,24 @@ resetConfBtn.addEventListener('click', () => {
 resetCancelBtn.addEventListener('click', () => resetModal.classList.remove('open'));
 resetModal.addEventListener('click', e => { if (e.target === resetModal) resetModal.classList.remove('open'); });
 
-// ── Mobile Clue Tabs ───────────────────────────────────────────
-function switchClueTab(dir) {
-  if (window.innerWidth > 640 || document.body.classList.contains('embed-mode')) return;
-  clueTabAcross.classList.toggle('active', dir === 'across');
-  clueTabDown.classList.toggle('active', dir === 'down');
-  acrossSection.classList.toggle('tab-active', dir === 'across');
-  downSection.classList.toggle('tab-active', dir === 'down');
-}
+// ── Mobile Clue Tabs (legacy — kept for embed-mode guard) ─────
+function switchClueTab() { /* no-op: mobile no longer uses tabs */ }
 
-clueTabAcross.addEventListener('click', () => switchClueTab('across'));
-clueTabDown.addEventListener('click', () => switchClueTab('down'));
+// ── Mobile Clue Navigator ──────────────────────────────────────
+mobilePrevBtn.addEventListener('click', () => { if (puzzle && !solved) handleTab(true); });
+mobileNextBtn.addEventListener('click', () => { if (puzzle && !solved) handleTab(false); });
+
+// ── Mobile Keyboard ────────────────────────────────────────────
+mobileKeyboard.addEventListener('click', e => {
+  if (!puzzle || solved) return;
+  const key = e.target.closest('.kb-key')?.dataset.key;
+  if (!key) return;
+  if (key === 'Backspace') {
+    handleBackspace();
+  } else {
+    handleLetter(key);
+  }
+});
 
 // ── Drag & Drop / File Input ───────────────────────────────────
 function setupLoadUI() {
@@ -858,9 +895,7 @@ function initGame(puz) {
   const [firstRow, firstCol] = findFirstWhiteCell();
   setSelection(firstRow, firstCol, 'across');
 
-  // Mobile: default to across tab
-  switchClueTab('across');
-  acrossSection.classList.add('tab-active');
+  updateMobileClue();
 
   // Attach keyboard listener (remove first to prevent accumulation on re-load)
   document.removeEventListener('keydown', handleKeyDown);
