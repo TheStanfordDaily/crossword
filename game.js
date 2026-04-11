@@ -755,8 +755,16 @@ helpModal.addEventListener('click', e => { if (e.target === helpModal) helpModal
 winCloseBtn.addEventListener('click', () => winModal.classList.remove('open'));
 winModal.addEventListener('click', e => { if (e.target === winModal) winModal.classList.remove('open'); });
 
+function getGamePageUrl() {
+  const shareUrl = new URLSearchParams(window.location.search).get('shareUrl');
+  if (shareUrl) return shareUrl;
+  if (window !== window.top && document.referrer) return document.referrer;
+  return window.location.href;
+}
+
 shareBtn.addEventListener('click', () => {
-  const text = `I solved "${puzzle.title}"${puzzle.author ? ` by ${puzzle.author}` : ''} in ${formatTime(timerElapsed)}!`;
+  const url = getGamePageUrl();
+  const text = `I solved "${puzzle.title}"${puzzle.author ? ` by ${puzzle.author}` : ''} in ${formatTime(timerElapsed)}!\n\n${url}`;
 
   function onCopied() {
     shareBtn.textContent = 'Copied!';
