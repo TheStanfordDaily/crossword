@@ -535,7 +535,7 @@ kbd {
   font-size: 0.75rem;
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  padding: 0.6rem 1rem 0.4rem;
+  padding: 0.6rem 1rem 0.4rem 0.25rem;
   color: var(--cardinal);
   flex-shrink: 0;
   border-bottom: 1px solid #e8e0e0;
@@ -553,7 +553,7 @@ kbd {
 .clue-item {
   display: flex;
   gap: 0.4rem;
-  padding: 0.3rem 1rem;
+  padding: 0.15rem 0.6rem 0.15rem 0.25rem;
   font-family: var(--serif);
   font-size: 0.9rem;
   line-height: 1.4;
