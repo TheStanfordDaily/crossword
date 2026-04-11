@@ -277,10 +277,6 @@ function setSelection(row, col, dir) {
 }
 
 function highlightActiveClue(dir, num) {
-  // Remove from both directions first
-  Object.values(clueElements.across).forEach(el => el.classList.remove('active-clue'));
-  Object.values(clueElements.down).forEach(el => el.classList.remove('active-clue'));
-
   const el = clueElements[dir][num];
   if (el) {
     el.classList.add('active-clue');
@@ -420,8 +416,6 @@ function handleKeyDown(e) {
   if (winModal.classList.contains('open') || resetModal.classList.contains('open') || helpModal.classList.contains('open')) return;
   // Don't capture when menu is open (except Escape)
   if (menu.classList.contains('open') && e.key !== 'Escape') return;
-
-  const { row, col, dir } = selection;
 
   if (e.key === 'Escape') {
     menu.classList.remove('open');
@@ -670,7 +664,8 @@ function resetPuzzle() {
   updateAllCells();
   updateCompletedClues();
   saveState();
-  setSelection(findFirstWhiteCell()[0], findFirstWhiteCell()[1], 'across');
+  const [resetRow, resetCol] = findFirstWhiteCell();
+  setSelection(resetRow, resetCol, 'across');
 }
 
 function findFirstWhiteCell() {
@@ -749,7 +744,7 @@ resetModal.addEventListener('click', e => { if (e.target === resetModal) resetMo
 
 // ── Mobile Clue Tabs ───────────────────────────────────────────
 function switchClueTab(dir) {
-  if (window.innerWidth > 640) return;
+  if (window.innerWidth > 640 || document.body.classList.contains('embed-mode')) return;
   clueTabAcross.classList.toggle('active', dir === 'across');
   clueTabDown.classList.toggle('active', dir === 'down');
   acrossSection.classList.toggle('tab-active', dir === 'across');
@@ -867,7 +862,8 @@ function initGame(puz) {
   switchClueTab('across');
   acrossSection.classList.add('tab-active');
 
-  // Attach keyboard listener
+  // Attach keyboard listener (remove first to prevent accumulation on re-load)
+  document.removeEventListener('keydown', handleKeyDown);
   document.addEventListener('keydown', handleKeyDown);
 }
 
