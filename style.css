@@ -751,18 +751,30 @@ body.embed-mode #puzzle-title {
   display: none;
 }
 
-body.embed-mode #app {
-  border-radius: 8px;
+/* Embed mode overrides — high specificity so these beat the mobile media query */
+
+/* Lock body to iframe height so the flex height chain works at any viewport width */
+body.embed-mode {
+  height: 100vh;
   overflow: hidden;
 }
 
-/* Always show side-by-side layout in embed mode, regardless of viewport width */
+body.embed-mode #app {
+  height: 100vh;
+  overflow: hidden;
+  border-radius: 8px;
+}
+
+/* Force side-by-side layout */
 body.embed-mode #puzzle-area {
   flex-direction: row;
   overflow: hidden;
 }
 
+/* Grid fills remaining width; sits at the top */
 body.embed-mode #grid-wrapper {
+  flex: 1;
+  overflow: auto;
   align-self: flex-start;
 }
 
@@ -770,24 +782,42 @@ body.embed-mode #active-clue-bar {
   display: none;
 }
 
+/* Clue panel: fixed 280 px wide, stretches to full puzzle-area height */
 body.embed-mode #clue-panel {
   flex: 0 0 280px;
+  height: auto;        /* let align-items:stretch do the work */
+  overflow: hidden;
   border-left: 1px solid #ccc;
   border-top: none;
-  min-height: unset;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
 }
 
 body.embed-mode #clue-tabs {
   display: none;
 }
 
+/* Both sections visible, each taking half the panel height */
 body.embed-mode #across-section,
 body.embed-mode #down-section {
   display: flex;
+  flex: 1;
+  min-height: 0;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* Clue list scrolls within its section */
+body.embed-mode .clue-list {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
 }
 
 body.embed-mode .clue-section-header {
   display: block;
+  flex-shrink: 0;
 }
 
 /* ── Media Queries (Mobile ≤ 640px) ─────────────────────────── */
