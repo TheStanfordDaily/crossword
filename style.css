@@ -885,7 +885,7 @@ body.embed-mode #app {
     /* Size the wrapper to fit the grid: min of full-width vs height-available×(cols/rows).
        --puzzle-cols / --puzzle-rows set by JS after puzzle loads.
        On mobile the header (48px) and banner are hidden, freeing ~270px instead of ~320px. */
-    width: min(100%, calc((100dvh - 270px) * var(--puzzle-cols, 15) / var(--puzzle-rows, 15)));
+    width: min(100%, calc((100dvh - 300px) * var(--puzzle-cols, 15) / var(--puzzle-rows, 15)));
   }
 
   #grid-container {
@@ -972,14 +972,14 @@ body.embed-mode #app {
 
   .kb-key {
     flex: 1;
-    max-width: 36px;
-    height: 42px;
+    max-width: 42px;
+    height: 52px;
     background: #e2d8cc;
     border: none;
     border-radius: 10px;
     box-shadow: 0 2px 0 rgba(0,0,0,0.12);
     font-family: var(--sans);
-    font-size: 0.9rem;
+    font-size: 1rem;
     font-weight: 700;
     color: #1e1b18;
     cursor: pointer;
@@ -997,8 +997,8 @@ body.embed-mode #app {
   }
 
   .kb-back {
-    max-width: 52px;
-    font-size: 1.1rem;
+    max-width: 62px;
+    font-size: 1.2rem;
     background: #c8bdb0;
     color: #1e1b18;
   }
@@ -1029,7 +1029,7 @@ body.is-mobile #grid-wrapper {
   flex: none;
   padding: 0;
   overflow: hidden;
-  width: min(100%, calc((100dvh - 270px) * var(--puzzle-cols, 15) / var(--puzzle-rows, 15)));
+  width: min(100%, calc((100dvh - 300px) * var(--puzzle-cols, 15) / var(--puzzle-rows, 15)));
 }
 
 body.is-mobile #grid-container {
@@ -1107,14 +1107,14 @@ body.is-mobile .kb-row {
 
 body.is-mobile .kb-key {
   flex: 1;
-  max-width: 36px;
-  height: 42px;
+  max-width: 42px;
+  height: 52px;
   background: #e2d8cc;
   border: none;
   border-radius: 10px;
   box-shadow: 0 2px 0 rgba(0,0,0,0.12);
   font-family: var(--sans);
-  font-size: 0.9rem;
+  font-size: 1rem;
   font-weight: 700;
   color: #1e1b18;
   cursor: pointer;
@@ -1126,7 +1126,7 @@ body.is-mobile .kb-key {
 }
 
 body.is-mobile .kb-back {
-  max-width: 52px;
-  font-size: 1.1rem;
+  max-width: 62px;
+  font-size: 1.2rem;
   background: #c8bdb0;
 }
