@@ -1,0 +1,679 @@
+/* ============================================================
+   style.css — Crossword Puzzle App
+   Stanford Daily — Cardinal red & white theme
+   ============================================================ */
+
+/* ── Custom Properties ──────────────────────────────────────── */
+:root {
+  /* Stanford Cardinal palette */
+  --cardinal:      #8C1515;
+  --cardinal-dark: #651010;
+  --cardinal-light:#fdf0f0;
+  --cardinal-mid:  #f5c6c6;
+
+  --cell-bg:       #ffffff;
+  --black-sq:      #1a1a1a;
+  --border-color:  #555555;
+  --active-cell:   #f7e04a;       /* yellow — high contrast on both red and white */
+  --active-word:   #fde8e8;       /* light cardinal tint */
+  --incorrect:     #b91c1c;
+  --revealed:      #8C1515;       /* cardinal for revealed letters */
+  --checked-dot:   #8C1515;
+  --gray-bg:       #f2eeee;       /* warm off-white */
+  --panel-bg:      #fdf8f8;       /* barely-pink white */
+  --clue-active-bg:#fde8e8;       /* matches active-word */
+  --clue-done:     #b8a8a8;
+  --header-bg:     #8C1515;       /* Stanford Cardinal */
+  --header-fg:     #ffffff;
+  --btn-bg:        #8C1515;
+  --btn-hover:     #651010;
+  --modal-overlay: rgba(60, 0, 0, 0.5);
+  --serif:         Georgia, 'Times New Roman', serif;
+  --sans:          system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --cell-border:   1px solid var(--border-color);
+}
+
+/* ── Reset ───────────────────────────────────────────────────── */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  height: 100%;
+}
+
+body {
+  font-family: var(--sans);
+  background: var(--gray-bg);
+  color: #1a1a1a;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+/* ── Load Screen ─────────────────────────────────────────────── */
+#load-screen {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  gap: 1.5rem;
+}
+
+#load-screen h1 {
+  font-family: var(--serif);
+  font-size: 2rem;
+  letter-spacing: -0.02em;
+}
+
+#load-screen p {
+  color: #555;
+  font-size: 0.95rem;
+}
+
+#drop-zone {
+  width: 100%;
+  max-width: 420px;
+  border: 2px dashed #999;
+  border-radius: 12px;
+  padding: 3rem 2rem;
+  text-align: center;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+  background: #fff;
+}
+
+#drop-zone:hover,
+#drop-zone.drag-over {
+  border-color: var(--revealed);
+  background: #eef4fc;
+}
+
+#drop-zone svg {
+  display: block;
+  margin: 0 auto 1rem;
+  opacity: 0.4;
+}
+
+#drop-zone p {
+  margin-bottom: 0.75rem;
+  font-size: 1rem;
+  color: #444;
+}
+
+#file-input {
+  display: none;
+}
+
+.browse-btn {
+  display: inline-block;
+  padding: 0.5rem 1.25rem;
+  border-radius: 6px;
+  background: var(--btn-bg);
+  color: #fff;
+  font-size: 0.9rem;
+  cursor: pointer;
+  border: none;
+  font-family: var(--sans);
+  transition: background 0.15s;
+}
+
+.browse-btn:hover {
+  background: var(--btn-hover);
+}
+
+#load-error {
+  color: var(--incorrect);
+  font-size: 0.9rem;
+  min-height: 1.2em;
+}
+
+/* ── App (shown once puzzle loaded) ──────────────────────────── */
+#app {
+  display: none;
+  flex-direction: column;
+  flex: 1;
+  overflow: hidden;
+}
+
+#app.visible {
+  display: flex;
+}
+
+/* ── Header ──────────────────────────────────────────────────── */
+#header {
+  background: var(--header-bg);
+  color: var(--header-fg);
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0 1rem;
+  height: 48px;
+  flex-shrink: 0;
+  position: relative;
+  z-index: 10;
+}
+
+#puzzle-title {
+  flex: 1;
+  font-family: var(--serif);
+  font-size: 1rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+#timer {
+  font-variant-numeric: tabular-nums;
+  font-size: 0.95rem;
+  letter-spacing: 0.04em;
+  min-width: 4ch;
+  text-align: right;
+}
+
+.header-btn {
+  background: transparent;
+  border: 1px solid rgba(255,255,255,0.3);
+  color: var(--header-fg);
+  border-radius: 5px;
+  padding: 0.3rem 0.75rem;
+  font-family: var(--sans);
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: background 0.15s;
+  white-space: nowrap;
+}
+
+.header-btn:hover {
+  background: rgba(255,255,255,0.15);
+}
+
+/* ── Menu Dropdown ───────────────────────────────────────────── */
+#menu-wrapper {
+  position: relative;
+}
+
+#menu {
+  display: none;
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.18);
+  min-width: 180px;
+  z-index: 100;
+  overflow: hidden;
+}
+
+#menu.open {
+  display: block;
+}
+
+#menu button {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 0.55rem 1rem;
+  background: none;
+  border: none;
+  font-family: var(--sans);
+  font-size: 0.9rem;
+  color: #222;
+  cursor: pointer;
+  transition: background 0.1s;
+}
+
+#menu button:hover {
+  background: var(--gray-bg);
+}
+
+#menu hr {
+  border: none;
+  border-top: 1px solid #e8e8e8;
+  margin: 2px 0;
+}
+
+/* ── Puzzle Area ─────────────────────────────────────────────── */
+#puzzle-area {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+  gap: 0;
+}
+
+/* ── Grid ────────────────────────────────────────────────────── */
+#grid-wrapper {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 1rem;
+  overflow: auto;
+  flex-shrink: 0;
+}
+
+#grid-container {
+  display: grid;
+  border: 2px solid var(--border-color);
+  container-type: inline-size;
+  /* grid-template-columns set dynamically via JS */
+  /* width set dynamically based on puzzle size */
+  max-width: min(55vw, 580px);
+  width: 100%;
+}
+
+.cell {
+  position: relative;
+  aspect-ratio: 1;
+  background: var(--cell-bg);
+  border-right: var(--cell-border);
+  border-bottom: var(--cell-border);
+  cursor: default;
+  user-select: none;
+}
+
+/* Remove redundant right/bottom borders at grid edges */
+.cell:last-child { border-right: none; }
+
+.cell.black {
+  background: var(--black-sq);
+  cursor: default;
+}
+
+.cell.active-cell {
+  background: var(--active-cell);
+}
+
+.cell.active-word:not(.active-cell) {
+  background: var(--active-word);
+}
+
+/* Cell number label */
+.cell-number {
+  position: absolute;
+  top: 5%;
+  left: 5%;
+  font-size: clamp(6px, 1.5cqw, 10px);
+  line-height: 1;
+  font-family: var(--sans);
+  color: #111;
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Letter in cell */
+.cell-letter {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--sans);
+  font-weight: 700;
+  font-size: clamp(10px, 3.5cqw, 26px);
+  color: #111;
+  pointer-events: none;
+}
+
+/* Incorrect letter */
+.cell.incorrect .cell-letter {
+  color: var(--incorrect);
+}
+
+/* Revealed letter */
+.cell.revealed .cell-letter {
+  color: var(--revealed);
+}
+
+/* Dot indicator for checked/revealed cells */
+.cell.checked::after,
+.cell.revealed::after {
+  content: '•';
+  position: absolute;
+  top: 2%;
+  right: 5%;
+  font-size: clamp(5px, 1.2cqw, 8px);
+  color: var(--checked-dot);
+  line-height: 1;
+  pointer-events: none;
+}
+
+/* ── Active-Clue Bar (mobile) ────────────────────────────────── */
+#active-clue-bar {
+  display: none;
+  background: var(--active-word);
+  padding: 0.5rem 1rem;
+  font-family: var(--serif);
+  font-size: 0.9rem;
+  line-height: 1.4;
+  border-top: 1px solid #bbb;
+  flex-shrink: 0;
+}
+
+/* ── Clue Panel ──────────────────────────────────────────────── */
+#clue-panel {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: var(--panel-bg);
+  border-left: 1px solid #ccc;
+  min-width: 0;
+}
+
+/* Clue panel tabs (mobile only) */
+#clue-tabs {
+  display: none;
+  flex-shrink: 0;
+  border-bottom: 2px solid #ccc;
+}
+
+#clue-tabs button {
+  flex: 1;
+  padding: 0.5rem;
+  background: none;
+  border: none;
+  font-family: var(--sans);
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  color: #666;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -2px;
+}
+
+#clue-tabs button.active {
+  color: var(--revealed);
+  border-bottom-color: var(--revealed);
+}
+
+.clue-section {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0.75rem 0;
+  min-height: 0;
+}
+
+/* Desktop: both sections visible, split evenly */
+#across-section,
+#down-section {
+  flex: 1;
+  overflow-y: auto;
+  min-height: 0;
+}
+
+#across-section {
+  border-bottom: 1px solid #ccc;
+}
+
+.clue-section-header {
+  font-family: var(--sans);
+  font-weight: 700;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  padding: 0 1rem 0.4rem;
+  color: #555;
+  flex-shrink: 0;
+}
+
+.clue-list {
+  list-style: none;
+}
+
+.clue-item {
+  display: flex;
+  gap: 0.4rem;
+  padding: 0.3rem 1rem;
+  font-family: var(--serif);
+  font-size: 0.9rem;
+  line-height: 1.4;
+  cursor: pointer;
+  transition: background 0.1s;
+  border-radius: 4px;
+  margin: 0 0.25rem;
+}
+
+.clue-item:hover {
+  background: rgba(0,0,0,0.05);
+}
+
+.clue-item.active-clue {
+  background: var(--clue-active-bg);
+}
+
+.clue-item.completed-clue .clue-text {
+  color: var(--clue-done);
+}
+
+.clue-num {
+  font-weight: 700;
+  min-width: 2.2ch;
+  text-align: right;
+  flex-shrink: 0;
+  color: #444;
+  font-family: var(--sans);
+  font-size: 0.85rem;
+  padding-top: 0.05em;
+}
+
+.clue-text {
+  flex: 1;
+}
+
+/* ── Modals ───────────────────────────────────────────────────── */
+.modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: var(--modal-overlay);
+  z-index: 200;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal-overlay.open {
+  display: flex;
+}
+
+.modal {
+  background: #fff;
+  border-radius: 12px;
+  padding: 2rem;
+  max-width: 400px;
+  width: 90%;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.25);
+  text-align: center;
+}
+
+.modal h2 {
+  font-family: var(--serif);
+  font-size: 1.6rem;
+  margin-bottom: 0.5rem;
+}
+
+.modal p {
+  color: #555;
+  font-size: 0.95rem;
+  margin-bottom: 0.3rem;
+  line-height: 1.5;
+}
+
+.modal .solve-time {
+  font-size: 1.8rem;
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+  margin: 0.75rem 0;
+  color: #222;
+}
+
+.modal-actions {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: center;
+  margin-top: 1.25rem;
+  flex-wrap: wrap;
+}
+
+.btn {
+  padding: 0.55rem 1.25rem;
+  border-radius: 6px;
+  border: none;
+  font-family: var(--sans);
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: background 0.15s, opacity 0.15s;
+}
+
+.btn-primary {
+  background: var(--header-bg);
+  color: #fff;
+}
+
+.btn-primary:hover {
+  background: var(--cardinal-dark);
+}
+
+.btn-secondary {
+  background: var(--gray-bg);
+  color: #222;
+}
+
+.btn-secondary:hover {
+  background: #d4d4d4;
+}
+
+.btn-danger {
+  background: var(--incorrect);
+  color: #fff;
+}
+
+.btn-danger:hover {
+  opacity: 0.85;
+}
+
+/* ── Scramble Warning ────────────────────────────────────────── */
+#scramble-warning {
+  display: none;
+  background: #fff3cd;
+  color: #856404;
+  border: 1px solid #ffc107;
+  border-radius: 6px;
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+/* ── Puzzle Logo (header image) ──────────────────────────────── */
+#puzzle-logo {
+  height: 30px;
+  width: auto;
+  object-fit: contain;
+  display: none;
+  border-radius: 4px;
+  flex-shrink: 0;
+}
+
+#puzzle-logo.visible {
+  display: block;
+}
+
+/* When logo is shown, hide the text title */
+#header:has(#puzzle-logo.visible) #puzzle-title {
+  display: none;
+}
+
+/* ── Puzzle Footer ────────────────────────────────────────────── */
+#puzzle-footer {
+  display: none;
+  text-align: center;
+  padding: 0.5rem 1rem 0.6rem;
+  font-family: var(--sans);
+  font-size: 0.8rem;
+  color: #666;
+  background: var(--panel-bg);
+  border-top: 1px solid #ddd;
+  flex-shrink: 0;
+}
+
+#puzzle-footer.visible {
+  display: block;
+}
+
+/* ── Embed Mode ──────────────────────────────────────────────── */
+body.embed-mode #header,
+body.embed-mode #load-screen {
+  display: none !important;
+}
+
+body.embed-mode #app {
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+/* ── Media Queries (Mobile ≤ 640px) ─────────────────────────── */
+@media (max-width: 640px) {
+  #puzzle-area {
+    flex-direction: column;
+    overflow: auto;
+  }
+
+  #grid-wrapper {
+    padding: 0.5rem;
+    flex-shrink: 0;
+    justify-content: center;
+  }
+
+  #grid-container {
+    max-width: 100%;
+    width: 100%;
+  }
+
+  #active-clue-bar {
+    display: block;
+  }
+
+  #clue-panel {
+    border-left: none;
+    border-top: 1px solid #ccc;
+    flex: 1;
+    min-height: 200px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+
+  #clue-tabs {
+    display: flex;
+  }
+
+  /* On mobile, only one section visible at a time */
+  #across-section,
+  #down-section {
+    display: none;
+    flex: 1;
+    overflow-y: auto;
+    min-height: 0;
+    padding-top: 0.5rem;
+  }
+
+  #across-section.tab-active,
+  #down-section.tab-active {
+    display: flex;
+    flex-direction: column;
+  }
+
+  #across-section {
+    border-bottom: none;
+  }
+
+  .clue-section-header {
+    display: none;
+  }
+}

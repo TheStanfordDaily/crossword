@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>The Stanford Daily — Crossword</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- ── Load Screen ─────────────────────────────────────────── -->
+  <div id="load-screen">
+    <h1>Crossword</h1>
+    <p>Load a .puz file to play</p>
+
+    <div id="drop-zone" role="button" tabindex="0" aria-label="Drop a .puz file here or click to browse">
+      <!-- Upload icon -->
+      <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+        <polyline points="17 8 12 3 7 8"/>
+        <line x1="12" y1="3" x2="12" y2="15"/>
+      </svg>
+      <p>Drag &amp; drop a .puz file here</p>
+      <label class="browse-btn" for="file-input">Browse file</label>
+      <input type="file" id="file-input" accept=".puz">
+    </div>
+
+    <div id="load-error" role="alert" aria-live="polite"></div>
+  </div>
+
+  <!-- ── App (shown once puzzle is loaded) ───────────────────── -->
+  <div id="app" role="main" aria-label="Crossword puzzle">
+
+    <!-- Header -->
+    <header id="header">
+      <img id="puzzle-logo" src="" alt="" aria-hidden="true">
+      <span id="puzzle-title" aria-label="Puzzle title"></span>
+      <span id="timer" aria-label="Elapsed time" aria-live="off">00:00</span>
+
+      <div id="menu-wrapper">
+        <button id="menu-toggle" class="header-btn" aria-haspopup="true" aria-expanded="false" aria-controls="menu">
+          Menu ▾
+        </button>
+        <div id="menu" role="menu" aria-label="Game options">
+          <button id="menu-check-cell"    role="menuitem">Check Cell</button>
+          <button id="menu-check-word"    role="menuitem">Check Word</button>
+          <button id="menu-check-puzzle"  role="menuitem">Check Puzzle</button>
+          <hr>
+          <button id="menu-reveal-cell"   role="menuitem">Reveal Cell</button>
+          <button id="menu-reveal-word"   role="menuitem">Reveal Word</button>
+          <button id="menu-reveal-puzzle" role="menuitem">Reveal Puzzle</button>
+          <hr>
+          <button id="menu-reset"         role="menuitem">Reset Puzzle</button>
+        </div>
+      </div>
+    </header>
+
+    <!-- Scramble warning (hidden unless puzzle is scrambled) -->
+    <div id="scramble-warning" role="alert"></div>
+
+    <!-- Puzzle area: grid + clue panel -->
+    <div id="puzzle-area">
+
+      <!-- Grid -->
+      <div id="grid-wrapper">
+        <div id="grid-container" aria-label="Crossword grid" role="grid"></div>
+      </div>
+
+      <!-- Active-clue bar (mobile only) -->
+      <div id="active-clue-bar" aria-live="polite" aria-atomic="true"></div>
+
+      <!-- Clue panel -->
+      <div id="clue-panel" aria-label="Clues">
+        <!-- Tabs (mobile only) -->
+        <div id="clue-tabs" role="tablist" aria-label="Clue direction">
+          <button id="clue-tab-across" class="active" role="tab" aria-selected="true"  aria-controls="across-section">Across</button>
+          <button id="clue-tab-down"                  role="tab" aria-selected="false" aria-controls="down-section">Down</button>
+        </div>
+
+        <!-- Across clues -->
+        <div id="across-section" class="tab-active" role="tabpanel" aria-labelledby="clue-tab-across">
+          <div class="clue-section-header">Across</div>
+          <ol id="across-list" class="clue-list" aria-label="Across clues"></ol>
+        </div>
+
+        <!-- Down clues -->
+        <div id="down-section" role="tabpanel" aria-labelledby="clue-tab-down">
+          <div class="clue-section-header">Down</div>
+          <ol id="down-list" class="clue-list" aria-label="Down clues"></ol>
+        </div>
+      </div>
+
+    </div><!-- /puzzle-area -->
+
+    <!-- Footer (shown when ?type and ?num params are present) -->
+    <div id="puzzle-footer" aria-label="Puzzle info"></div>
+
+  </div><!-- /app -->
+
+  <!-- ── Win Modal ────────────────────────────────────────────── -->
+  <div id="win-modal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="win-heading">
+    <div class="modal">
+      <h2 id="win-heading">Puzzle Solved!</h2>
+      <p id="win-title"></p>
+      <p id="win-author"></p>
+      <div class="solve-time" id="win-time" aria-label="Solve time"></div>
+      <div class="modal-actions">
+        <button id="share-btn" class="btn btn-secondary">Share Result</button>
+        <button id="win-close-btn" class="btn btn-primary">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Reset Confirm Modal ───────────────────────────────────── -->
+  <div id="reset-modal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="reset-heading">
+    <div class="modal">
+      <h2 id="reset-heading">Reset Puzzle?</h2>
+      <p>This will clear all your letters and restart the timer.</p>
+      <div class="modal-actions">
+        <button id="reset-cancel-btn"  class="btn btn-secondary">Cancel</button>
+        <button id="reset-confirm-btn" class="btn btn-danger">Reset</button>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="game.js"></script>
+</body>
+</html>

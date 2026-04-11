@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>The Stanford Daily — Crossword Embed Generator</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    /* Page-specific overrides */
+    body {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      background: var(--gray-bg);
+    }
+
+    .gen-header {
+      background: var(--header-bg);
+      color: var(--header-fg);
+      padding: 0 1.5rem;
+      height: 48px;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .gen-header h1 {
+      font-family: var(--serif);
+      font-size: 1rem;
+      font-weight: 400;
+      color: #fff;
+    }
+
+    .gen-header a {
+      color: rgba(255,255,255,0.6);
+      text-decoration: none;
+      font-size: 0.85rem;
+      margin-left: auto;
+    }
+
+    .gen-header a:hover {
+      color: #fff;
+    }
+
+    .gen-main {
+      flex: 1;
+      max-width: 680px;
+      margin: 2rem auto;
+      width: 100%;
+      padding: 0 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+
+    .gen-card {
+      background: #fff;
+      border-radius: 10px;
+      padding: 1.5rem;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+    }
+
+    .gen-card h2 {
+      font-family: var(--serif);
+      font-size: 1.2rem;
+      margin-bottom: 1rem;
+    }
+
+    .field-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+      margin-bottom: 1rem;
+    }
+
+    .field-group label {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: #444;
+    }
+
+    .field-group input[type="text"],
+    .field-group input[type="number"],
+    .field-group input[type="url"] {
+      padding: 0.55rem 0.75rem;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-family: var(--sans);
+      font-size: 0.95rem;
+      width: 100%;
+      transition: border-color 0.15s;
+    }
+
+    .field-group input:focus {
+      outline: none;
+      border-color: var(--revealed);
+    }
+
+    /* Radio option cards */
+    .radio-group {
+      display: flex;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+    }
+
+    .radio-card {
+      flex: 1;
+      min-width: 140px;
+      border: 2px solid #ddd;
+      border-radius: 8px;
+      padding: 0.75rem 1rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      transition: border-color 0.15s, background 0.15s;
+      user-select: none;
+    }
+
+    .radio-card:hover {
+      border-color: #aaa;
+    }
+
+    .radio-card input[type="radio"] {
+      accent-color: var(--revealed);
+      width: 16px;
+      height: 16px;
+      flex-shrink: 0;
+    }
+
+    .radio-card input[type="radio"]:checked + .radio-card-content .radio-label {
+      color: var(--revealed);
+    }
+
+    .radio-card-content {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .radio-card:has(input:checked) {
+      border-color: var(--revealed);
+      background: #eef4fc;
+    }
+
+    .radio-card img {
+      height: 28px;
+      width: auto;
+      object-fit: contain;
+    }
+
+    .radio-label {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: #333;
+    }
+
+    .field-hint {
+      font-size: 0.8rem;
+      color: #777;
+    }
+
+    #generate-btn {
+      padding: 0.6rem 1.5rem;
+      background: var(--header-bg);
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      font-family: var(--sans);
+      font-size: 0.95rem;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+
+    #generate-btn:hover {
+      background: var(--cardinal-dark, #651010);
+    }
+
+    #generate-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .output-area {
+      display: none;
+    }
+
+    .output-area.visible {
+      display: block;
+    }
+
+    .output-label {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 0.5rem;
+    }
+
+    .output-label span {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: #444;
+    }
+
+    #copy-btn {
+      padding: 0.3rem 0.85rem;
+      background: var(--gray-bg);
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      font-family: var(--sans);
+      font-size: 0.85rem;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+
+    #copy-btn:hover {
+      background: #d4d4d4;
+    }
+
+    #output-textarea {
+      width: 100%;
+      min-height: 180px;
+      padding: 0.75rem;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-family: 'Menlo', 'Consolas', monospace;
+      font-size: 0.8rem;
+      resize: vertical;
+      color: #333;
+      background: #fafafa;
+    }
+
+    #puzzle-title-preview {
+      font-size: 0.85rem;
+      color: #555;
+      min-height: 1.2em;
+      margin-top: 0.25rem;
+    }
+
+    #gen-error {
+      color: var(--incorrect);
+      font-size: 0.875rem;
+      min-height: 1.2em;
+    }
+
+    .gen-footer {
+      text-align: center;
+      padding: 1rem;
+      font-size: 0.8rem;
+      color: #888;
+    }
+
+    @media (max-width: 640px) {
+      .gen-main {
+        margin: 1rem auto;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <header class="gen-header">
+    <h1>The Stanford Daily — Crossword Embed Generator</h1>
+    <a href="index.html">← Play</a>
+  </header>
+
+  <main class="gen-main">
+
+    <div class="gen-card">
+      <h2>Generate WordPress Embed Code</h2>
+
+      <div class="field-group">
+        <label>Puzzle type</label>
+        <div class="radio-group">
+          <label class="radio-card">
+            <input type="radio" name="puzzle-type" value="dimi" checked>
+            <div class="radio-card-content">
+              <span class="radio-label">Daily Diminutive</span>
+            </div>
+          </label>
+          <label class="radio-card">
+            <input type="radio" name="puzzle-type" value="crossword">
+            <div class="radio-card-content">
+              <span class="radio-label">Daily Crossword</span>
+            </div>
+          </label>
+        </div>
+      </div>
+
+      <div class="field-group">
+        <label for="puzzle-num-input">Puzzle number</label>
+        <input type="text" id="puzzle-num-input" placeholder="e.g. 139" autocomplete="off">
+        <span class="field-hint">Shown in the footer as "Daily Diminutive #139". Leave blank to omit.</span>
+      </div>
+
+      <div class="field-group">
+        <label for="puz-url-input">Puzzle file URL</label>
+        <input type="url" id="puz-url-input"
+               placeholder="https://raw.githubusercontent.com/user/repo/main/puzzles/2024-01-15.puz"
+               autocomplete="off" spellcheck="false">
+        <span class="field-hint">Must be a publicly accessible URL (CORS-enabled). Raw GitHub files and CDN assets work well.</span>
+      </div>
+
+      <div class="field-group">
+        <label for="height-input">iFrame height (px)</label>
+        <input type="number" id="height-input" value="700" min="300" max="1200" step="50">
+        <span class="field-hint">700px works well for standard 15×15 grids on desktop. Increase for larger puzzles or mobile-friendly embedding.</span>
+      </div>
+
+      <div id="gen-error" role="alert" aria-live="polite"></div>
+      <div id="puzzle-title-preview" aria-live="polite"></div>
+
+      <button id="generate-btn">Generate Embed Code</button>
+    </div>
+
+    <div class="gen-card output-area" id="output-area">
+      <div class="output-label">
+        <span>WordPress embed snippet</span>
+        <button id="copy-btn">Copy</button>
+      </div>
+      <textarea id="output-textarea" readonly spellcheck="false" aria-label="Generated embed HTML"></textarea>
+      <p style="font-size:0.8rem; color:#777; margin-top:0.5rem;">
+        Paste this into a <strong>Custom HTML</strong> block in WordPress.
+        Make sure the iframe's <code>src</code> domain is allowed under
+        <em>Settings → Reading → Allowed iframe domains</em> if required by your theme.
+      </p>
+    </div>
+
+  </main>
+
+  <footer class="gen-footer">
+    Embed code is safe to paste directly into a WordPress Custom HTML block.
+  </footer>
+
+  <script type="module">
+    import { parsePuz } from './puz-parser.js';
+
+    const puzUrlInput    = document.getElementById('puz-url-input');
+    const heightInput    = document.getElementById('height-input');
+    const puzzleNumInput = document.getElementById('puzzle-num-input');
+    const generateBtn    = document.getElementById('generate-btn');
+    const outputArea     = document.getElementById('output-area');
+    const outputTextarea = document.getElementById('output-textarea');
+    const copyBtn        = document.getElementById('copy-btn');
+    const genError       = document.getElementById('gen-error');
+    const titlePreview   = document.getElementById('puzzle-title-preview');
+
+    // Derive base URL for the player app (same origin, index.html)
+    const baseUrl = (() => {
+      const url = new URL(location.href);
+      url.pathname = url.pathname.replace(/generate\.html$/, '');
+      url.search = '';
+      url.hash = '';
+      return url.toString();
+    })();
+
+    generateBtn.addEventListener('click', async () => {
+      genError.textContent = '';
+      titlePreview.textContent = '';
+      outputArea.classList.remove('visible');
+
+      const rawUrl = puzUrlInput.value.trim();
+      if (!rawUrl) {
+        genError.textContent = 'Please enter a puzzle file URL.';
+        return;
+      }
+
+      let puzzleUrl;
+      try {
+        puzzleUrl = new URL(rawUrl);
+      } catch {
+        genError.textContent = 'Invalid URL. Please enter a full URL including https://.';
+        return;
+      }
+
+      const iframeHeight = parseInt(heightInput.value, 10) || 700;
+      const puzzleType   = document.querySelector('input[name="puzzle-type"]:checked')?.value || 'dimi';
+      const puzzleNum    = puzzleNumInput.value.trim();
+
+      generateBtn.disabled = true;
+      generateBtn.textContent = 'Loading puzzle…';
+
+      let puzzleTitle = '';
+      let puzzleAuthor = '';
+
+      try {
+        const resp = await fetch(rawUrl);
+        if (!resp.ok) throw new Error(`HTTP ${resp.status} — check that the URL is publicly accessible.`);
+        const buf = await resp.arrayBuffer();
+        const puz = parsePuz(buf);
+        puzzleTitle  = puz.title  || '';
+        puzzleAuthor = puz.author || '';
+        if (puzzleTitle) {
+          titlePreview.textContent = `Loaded: "${puzzleTitle}"${puzzleAuthor ? ` by ${puzzleAuthor}` : ''}`;
+        }
+      } catch (err) {
+        // Fetch failed (likely CORS) — generate snippet anyway with a placeholder title
+        if (err.message.includes('Failed to fetch') || err.message.includes('NetworkError')) {
+          genError.textContent = 'Could not fetch puzzle (CORS restriction). The embed code was generated without a title — you can edit it manually.';
+        } else {
+          genError.textContent = `Could not load puzzle: ${err.message}`;
+        }
+      } finally {
+        generateBtn.disabled = false;
+        generateBtn.textContent = 'Generate Embed Code';
+      }
+
+      const encodedUrl  = encodeURIComponent(rawUrl);
+      const typeName    = puzzleType === 'dimi' ? 'Daily Diminutive' : 'Daily Crossword';
+      const footerLabel = puzzleNum ? `${typeName} #${puzzleNum}` : typeName;
+
+      let iframeSrc = `${baseUrl}?puz=${encodedUrl}&embed=1&type=${puzzleType}`;
+      if (puzzleNum) iframeSrc += `&num=${encodeURIComponent(puzzleNum)}`;
+
+      const titleAttr = puzzleNum
+        ? `${footerLabel}`
+        : (puzzleTitle ? `Crossword — ${puzzleTitle}` : 'Crossword Puzzle');
+
+      const snippet = `<div style="max-width:760px; margin:0 auto;">
+  <iframe
+    src="${iframeSrc}"
+    width="100%"
+    height="${iframeHeight}"
+    frameborder="0"
+    scrolling="no"
+    style="border:none; border-radius:8px; overflow:hidden;"
+    title="${titleAttr}"
+    allow="clipboard-write">
+  </iframe>
+</div>`;
+
+      outputTextarea.value = snippet;
+      outputArea.classList.add('visible');
+      outputTextarea.select();
+    });
+
+    copyBtn.addEventListener('click', () => {
+      navigator.clipboard.writeText(outputTextarea.value).then(() => {
+        copyBtn.textContent = 'Copied!';
+        setTimeout(() => { copyBtn.textContent = 'Copy'; }, 2000);
+      }).catch(() => {
+        // Fallback: select the textarea so user can copy manually
+        outputTextarea.select();
+        copyBtn.textContent = 'Select all → copy manually';
+        setTimeout(() => { copyBtn.textContent = 'Copy'; }, 3000);
+      });
+    });
+
+    // Allow pressing Enter in the URL field to trigger generate
+    puzUrlInput.addEventListener('keydown', e => {
+      if (e.key === 'Enter') generateBtn.click();
+    });
+  </script>
+
+</body>
+</html>
