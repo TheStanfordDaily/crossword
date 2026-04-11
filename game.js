@@ -756,10 +756,7 @@ winCloseBtn.addEventListener('click', () => winModal.classList.remove('open'));
 winModal.addEventListener('click', e => { if (e.target === winModal) winModal.classList.remove('open'); });
 
 function getGamePageUrl() {
-  const shareUrl = new URLSearchParams(window.location.search).get('shareUrl');
-  if (shareUrl) return shareUrl;
-  if (window !== window.top && document.referrer) return document.referrer;
-  return window.location.href;
+  return 'https://stanforddaily.com/category/games/';
 }
 
 shareBtn.addEventListener('click', () => {
