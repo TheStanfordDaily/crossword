@@ -33,14 +33,23 @@
 
     <!-- Puzzle banner (shown when ?type + ?num params are present) -->
     <div id="puzzle-banner" aria-label="Puzzle heading">
-      <img id="banner-logo" src="" alt="">
-      <span id="banner-number"></span>
+      <div id="banner-top">
+        <img id="banner-logo" src="" alt="">
+        <span id="banner-number"></span>
+      </div>
+      <div id="banner-author"></div>
     </div>
 
     <!-- Header -->
     <header id="header">
       <span id="puzzle-title" aria-label="Puzzle title"></span>
-      <span id="timer" aria-label="Elapsed time" aria-live="off">00:00</span>
+
+      <button id="timer" aria-label="Timer — click to pause" aria-live="off">
+        <span id="timer-icon">▶</span>
+        <span id="timer-display">00:00</span>
+      </button>
+
+      <button id="help-btn" aria-label="How to play" title="How to play">?</button>
 
       <div id="menu-wrapper">
         <button id="menu-toggle" class="header-btn" aria-haspopup="true" aria-expanded="false" aria-controls="menu">
@@ -110,6 +119,39 @@
       <div class="modal-actions">
         <button id="share-btn" class="btn btn-secondary">Share Result</button>
         <button id="win-close-btn" class="btn btn-primary">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Help Modal ───────────────────────────────────────────── -->
+  <div id="help-modal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="help-heading">
+    <div class="modal">
+      <h2 id="help-heading">How to Play</h2>
+
+      <div class="help-section">
+        <h3>Navigation</h3>
+        <div class="help-row"><span class="help-key">Click a cell</span> Select it; click again to switch Across ↔ Down</div>
+        <div class="help-row"><span class="help-key"><kbd>→</kbd> <kbd>←</kbd> <kbd>↑</kbd> <kbd>↓</kbd></span> Move between cells; perpendicular arrow switches direction</div>
+        <div class="help-row"><span class="help-key"><kbd>Tab</kbd></span> Jump to the next word</div>
+        <div class="help-row"><span class="help-key"><kbd>Shift</kbd>+<kbd>Tab</kbd></span> Jump to the previous word</div>
+        <div class="help-row"><span class="help-key">Click a clue</span> Jump to that word's first empty cell</div>
+      </div>
+
+      <div class="help-section">
+        <h3>Filling in answers</h3>
+        <div class="help-row"><span class="help-key">Type a letter</span> Fill the cell and advance to the next empty cell</div>
+        <div class="help-row"><span class="help-key"><kbd>Backspace</kbd></span> Erase the current cell; or move back if already empty</div>
+      </div>
+
+      <div class="help-section">
+        <h3>Checking your work</h3>
+        <div class="help-row"><span class="help-key">Menu → Check</span> Highlight incorrect letters in red</div>
+        <div class="help-row"><span class="help-key">Menu → Reveal</span> Fill in the correct answer for a cell, word, or the whole puzzle</div>
+        <div class="help-row"><span class="help-key">Menu → Reset</span> Clear all letters and restart the timer</div>
+      </div>
+
+      <div class="modal-actions">
+        <button id="help-close-btn" class="btn btn-primary">Got it</button>
       </div>
     </div>
   </div>

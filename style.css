@@ -171,8 +171,118 @@ body {
   font-variant-numeric: tabular-nums;
   font-size: 0.95rem;
   letter-spacing: 0.04em;
-  min-width: 4ch;
-  text-align: right;
+  min-width: 5.5ch;
+  text-align: center;
+  background: transparent;
+  border: 1px solid rgba(255,255,255,0.3);
+  border-radius: 5px;
+  color: var(--header-fg);
+  padding: 0.3rem 0.6rem;
+  cursor: pointer;
+  font-family: var(--sans);
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  transition: background 0.15s;
+}
+
+#timer:hover {
+  background: rgba(255,255,255,0.15);
+}
+
+#timer.paused {
+  opacity: 0.7;
+}
+
+#timer-icon {
+  font-size: 0.75rem;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+/* ── Help Button ─────────────────────────────────────────────── */
+#help-btn {
+  background: transparent;
+  border: 1px solid rgba(255,255,255,0.3);
+  color: var(--header-fg);
+  border-radius: 50%;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--serif);
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.15s;
+  flex-shrink: 0;
+}
+
+#help-btn:hover {
+  background: rgba(255,255,255,0.15);
+}
+
+/* ── Help Modal ──────────────────────────────────────────────── */
+#help-modal .modal {
+  max-width: 460px;
+  text-align: left;
+}
+
+#help-modal h2 {
+  text-align: center;
+  margin-bottom: 1.25rem;
+}
+
+.help-section {
+  margin-bottom: 1rem;
+}
+
+.help-section h3 {
+  font-family: var(--sans);
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--cardinal);
+  margin-bottom: 0.5rem;
+}
+
+.help-row {
+  display: flex;
+  align-items: baseline;
+  gap: 0.75rem;
+  padding: 0.25rem 0;
+  font-size: 0.9rem;
+  color: #333;
+  line-height: 1.4;
+}
+
+.help-row + .help-row {
+  border-top: 1px solid #f0e8e8;
+}
+
+.help-key {
+  font-family: var(--sans);
+  font-size: 0.78rem;
+  font-weight: 600;
+  white-space: nowrap;
+  min-width: 110px;
+  color: #555;
+  flex-shrink: 0;
+}
+
+kbd {
+  display: inline-block;
+  background: #f4f0f0;
+  border: 1px solid #ccc;
+  border-bottom-width: 2px;
+  border-radius: 4px;
+  padding: 0.1em 0.4em;
+  font-family: var(--sans);
+  font-size: 0.75rem;
+  color: #333;
+  line-height: 1.4;
 }
 
 .header-btn {
@@ -249,23 +359,21 @@ body {
 
 /* ── Grid ────────────────────────────────────────────────────── */
 #grid-wrapper {
+  flex: 1;              /* takes all space left after the fixed clue panel */
   display: flex;
   align-items: flex-start;
   justify-content: center;
   padding: 1rem;
   overflow: auto;
-  flex-shrink: 0;
-  align-self: flex-start; /* don't stretch grid wrapper to full panel height */
 }
 
 #grid-container {
   display: grid;
   border: 2px solid var(--border-color);
-  container-type: inline-size;
   /* grid-template-columns set dynamically via JS */
-  /* width set dynamically based on puzzle size */
-  max-width: min(55vw, 580px);
+  /* width fills the wrapper minus padding; aspect-ratio keeps cells square */
   width: 100%;
+  max-width: 100%;
 }
 
 .cell {
@@ -276,6 +384,7 @@ body {
   border-bottom: var(--cell-border);
   cursor: default;
   user-select: none;
+  container-type: inline-size; /* cqw units in children = % of this cell's width */
 }
 
 /* Remove redundant right/bottom borders at grid edges */
@@ -299,7 +408,7 @@ body {
   position: absolute;
   top: 5%;
   left: 5%;
-  font-size: clamp(6px, 1.5cqw, 10px);
+  font-size: clamp(6px, 22cqw, 11px);
   line-height: 1;
   font-family: var(--sans);
   color: #111;
@@ -316,7 +425,7 @@ body {
   justify-content: center;
   font-family: var(--sans);
   font-weight: 700;
-  font-size: clamp(10px, 3.5cqw, 26px);
+  font-size: clamp(10px, 55cqw, 28px);
   color: #111;
   pointer-events: none;
 }
@@ -326,10 +435,23 @@ body {
   color: var(--incorrect);
 }
 
-/* Revealed letter */
-.cell.revealed .cell-letter {
-  color: var(--revealed);
+/* Single diagonal slash through incorrect cells */
+.cell.incorrect::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to bottom right,
+    transparent calc(50% - 0.75px),
+    var(--incorrect) calc(50% - 0.75px),
+    var(--incorrect) calc(50% + 0.75px),
+    transparent calc(50% + 0.75px)
+  );
+  pointer-events: none;
+  z-index: 1;
 }
+
+/* Revealed letter — no color change, looks like a normal filled cell */
 
 /* Dot indicator for checked/revealed cells */
 .cell.checked::after,
@@ -338,7 +460,7 @@ body {
   position: absolute;
   top: 2%;
   right: 5%;
-  font-size: clamp(5px, 1.2cqw, 8px);
+  font-size: clamp(5px, 15cqw, 8px);
   color: var(--checked-dot);
   line-height: 1;
   pointer-events: none;
@@ -358,14 +480,12 @@ body {
 
 /* ── Clue Panel ──────────────────────────────────────────────── */
 #clue-panel {
-  flex: 1;
+  flex: 0 0 280px;      /* fixed width — never grows or shrinks */
   display: flex;
   flex-direction: column;
   overflow: hidden;
   background: var(--panel-bg);
   border-left: 1px solid #ccc;
-  min-width: 220px;
-  max-width: 320px;
 }
 
 /* Clue panel tabs (mobile only) */
@@ -577,10 +697,11 @@ body {
 /* ── Puzzle Banner ───────────────────────────────────────────── */
 #puzzle-banner {
   display: none;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 0.6rem;
-  padding: 0.65rem 1.25rem;
+  gap: 0.2rem;
+  padding: 0.55rem 1.25rem 0.6rem;
   background: var(--cardinal);
   border-bottom: 2px solid var(--cardinal-dark);
   flex-shrink: 0;
@@ -590,26 +711,46 @@ body {
   display: flex;
 }
 
+#banner-top {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+}
+
 #banner-logo {
-  height: 28px;
+  height: 26px;
   width: auto;
   object-fit: contain;
   display: block;
 }
 
 #banner-number {
-  font-family: var(--serif);   /* Georgia */
-  font-size: 1.1rem;
+  font-family: var(--serif);
+  font-size: 1.05rem;
   font-weight: 400;
   color: #ffffff;
   letter-spacing: 0.01em;
   line-height: 1;
 }
 
+#banner-author {
+  font-family: var(--serif);
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.8);
+  font-style: italic;
+  line-height: 1;
+  min-height: 0;
+}
+
 /* ── Embed Mode ──────────────────────────────────────────────── */
-body.embed-mode #header,
 body.embed-mode #load-screen {
   display: none !important;
+}
+
+/* In embed mode, hide the text title (banner already shows puzzle info)
+   but keep the timer, help, and menu visible */
+body.embed-mode #puzzle-title {
+  display: none;
 }
 
 body.embed-mode #app {

@@ -160,6 +160,10 @@
       color: #777;
     }
 
+    .required {
+      color: var(--incorrect, #b91c1c);
+    }
+
     #generate-btn {
       padding: 0.6rem 1.5rem;
       background: var(--header-bg);
@@ -288,23 +292,29 @@
       </div>
 
       <div class="field-group">
-        <label for="puzzle-num-input">Puzzle number</label>
+        <label for="puzzle-num-input">Puzzle number <span class="required">*</span></label>
         <input type="text" id="puzzle-num-input" placeholder="e.g. 139" autocomplete="off">
-        <span class="field-hint">Shown in the footer as "Daily Diminutive #139". Leave blank to omit.</span>
+        <span class="field-hint">Shown in the header as "Daily Diminutive #139".</span>
       </div>
 
       <div class="field-group">
-        <label for="puz-url-input">Puzzle file URL</label>
+        <label for="puzzle-title-input">Title</label>
+        <input type="text" id="puzzle-title-input" placeholder="e.g. Spring Cleaning" autocomplete="off">
+        <span class="field-hint">Shown before the author as "Spring Cleaning by Jane Smith". Leave blank to omit.</span>
+      </div>
+
+      <div class="field-group">
+        <label for="puzzle-author-input">Constructor <span class="required">*</span></label>
+        <input type="text" id="puzzle-author-input" placeholder="e.g. Jane Smith" autocomplete="off">
+        <span class="field-hint">Shown below the header as "by Jane Smith".</span>
+      </div>
+
+      <div class="field-group">
+        <label for="puz-url-input">Puzzle file URL <span class="required">*</span></label>
         <input type="url" id="puz-url-input"
                placeholder="https://github.com/user/repo/blob/main/puzzles/2024-01-15.puz"
                autocomplete="off" spellcheck="false">
         <span class="field-hint">Paste any GitHub URL — it will be converted to a raw link automatically.</span>
-      </div>
-
-      <div class="field-group">
-        <label for="height-input">iFrame height (px)</label>
-        <input type="number" id="height-input" value="700" min="300" max="1200" step="50">
-        <span class="field-hint">700px works well for standard 15×15 grids on desktop. Increase for larger puzzles or mobile-friendly embedding.</span>
       </div>
 
       <div id="gen-error" role="alert" aria-live="polite"></div>
@@ -335,10 +345,11 @@
   <script type="module">
     import { parsePuz } from './puz-parser.js';
 
-    const puzUrlInput    = document.getElementById('puz-url-input');
-    const heightInput    = document.getElementById('height-input');
-    const puzzleNumInput = document.getElementById('puzzle-num-input');
-    const generateBtn    = document.getElementById('generate-btn');
+    const puzUrlInput       = document.getElementById('puz-url-input');
+    const puzzleNumInput    = document.getElementById('puzzle-num-input');
+    const puzzleTitleInput  = document.getElementById('puzzle-title-input');
+    const puzzleAuthorInput = document.getElementById('puzzle-author-input');
+    const generateBtn       = document.getElementById('generate-btn');
     const outputArea     = document.getElementById('output-area');
     const outputTextarea = document.getElementById('output-textarea');
     const copyBtn        = document.getElementById('copy-btn');
@@ -353,9 +364,13 @@
       titlePreview.textContent = '';
       outputArea.classList.remove('visible');
 
+      // Validate required fields
+      const puzzleNum     = puzzleNumInput.value.trim();
+      const puzzleAuthor  = puzzleAuthorInput.value.trim();
       let rawUrl = puzUrlInput.value.trim();
-      if (!rawUrl) {
-        genError.textContent = 'Please enter a puzzle file URL.';
+
+      if (!puzzleNum || !puzzleAuthor || !rawUrl) {
+        genError.textContent = 'Puzzle number, constructor, and puzzle file URL are required.';
         return;
       }
 
@@ -378,25 +393,24 @@
         return;
       }
 
-      const iframeHeight = parseInt(heightInput.value, 10) || 700;
-      const puzzleType   = document.querySelector('input[name="puzzle-type"]:checked')?.value || 'dimi';
-      const puzzleNum    = puzzleNumInput.value.trim();
+      const puzzleType     = document.querySelector('input[name="puzzle-type"]:checked')?.value || 'dimi';
+      const puzzlePubTitle = puzzleTitleInput.value.trim();
 
       generateBtn.disabled = true;
       generateBtn.textContent = 'Loading puzzle…';
 
-      let puzzleTitle = '';
-      let puzzleAuthor = '';
+      let parsedTitle  = '';
+      let parsedAuthor = '';
 
       try {
         const resp = await fetch(rawUrl);
         if (!resp.ok) throw new Error(`HTTP ${resp.status} — check that the URL is publicly accessible.`);
         const buf = await resp.arrayBuffer();
         const puz = parsePuz(buf);
-        puzzleTitle  = puz.title  || '';
-        puzzleAuthor = puz.author || '';
-        titlePreview.textContent = puzzleTitle
-          ? `Loaded: "${puzzleTitle}"${puzzleAuthor ? ` by ${puzzleAuthor}` : ''}`
+        parsedTitle  = puz.title  || '';
+        parsedAuthor = puz.author || '';
+        titlePreview.textContent = parsedTitle
+          ? `Loaded: "${parsedTitle}"${parsedAuthor ? ` by ${parsedAuthor}` : ''}`
           : 'Loaded successfully.';
       } catch (err) {
         // Fetch failed — generate snippet anyway, show a clear actionable message
@@ -417,18 +431,20 @@
       playerUrl.searchParams.set('puz', rawUrl);
       playerUrl.searchParams.set('embed', '1');
       playerUrl.searchParams.set('type', puzzleType);
-      if (puzzleNum) playerUrl.searchParams.set('num', puzzleNum);
+      if (puzzleNum)      playerUrl.searchParams.set('num', puzzleNum);
+      if (puzzlePubTitle) playerUrl.searchParams.set('title', puzzlePubTitle);
+      if (puzzleAuthor)   playerUrl.searchParams.set('author', puzzleAuthor);
       const iframeSrc = playerUrl.toString();
 
       const titleAttr = puzzleNum
         ? `${footerLabel}`
-        : (puzzleTitle ? `Crossword — ${puzzleTitle}` : 'Crossword Puzzle');
+        : (parsedTitle ? `Crossword — ${parsedTitle}` : 'Crossword Puzzle');
 
       const snippet = `<div style="max-width:760px; margin:0 auto;">
   <iframe
     src="${iframeSrc}"
     width="100%"
-    height="${iframeHeight}"
+    height="700"
     frameborder="0"
     scrolling="no"
     style="border:none; border-radius:8px; overflow:hidden;"

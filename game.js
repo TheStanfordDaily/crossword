@@ -14,7 +14,12 @@ const loadError     = document.getElementById('load-error');
 const app           = document.getElementById('app');
 const header        = document.getElementById('header');
 const puzzleTitle   = document.getElementById('puzzle-title');
-const timerEl       = document.getElementById('timer');
+const timerBtn      = document.getElementById('timer');
+const timerDisplay  = document.getElementById('timer-display');
+const timerIcon     = document.getElementById('timer-icon');
+const helpBtn       = document.getElementById('help-btn');
+const helpModal     = document.getElementById('help-modal');
+const helpCloseBtn  = document.getElementById('help-close-btn');
 const menuWrapper   = document.getElementById('menu-wrapper');
 const menuToggleBtn = document.getElementById('menu-toggle');
 const menu          = document.getElementById('menu');
@@ -28,6 +33,7 @@ const scrambleWarn  = document.getElementById('scramble-warning');
 const puzzleBanner  = document.getElementById('puzzle-banner');
 const bannerLogo    = document.getElementById('banner-logo');
 const bannerNumber  = document.getElementById('banner-number');
+const bannerAuthor  = document.getElementById('banner-author');
 const winModal      = document.getElementById('win-modal');
 const winTitle      = document.getElementById('win-title');
 const winAuthor     = document.getElementById('win-author');
@@ -85,14 +91,27 @@ function storageKey() {
 }
 
 // ── Timer ──────────────────────────────────────────────────────
+function updateTimerUI() {
+  // Show ⏸ when running (click to pause), ▶ when paused (click to resume),
+  // no icon before the timer has started.
+  if (!timerStarted) {
+    timerIcon.textContent = '';
+  } else {
+    timerIcon.textContent = timerRunning ? '⏸' : '▶';
+  }
+  timerBtn.classList.toggle('paused', !timerRunning && timerStarted);
+  timerBtn.setAttribute('aria-label', timerRunning ? 'Timer — click to pause' : 'Timer — click to resume');
+}
+
 function startTimer() {
   if (timerRunning) return;
   timerStarted = true;
   timerRunning = true;
   timerInterval = setInterval(() => {
     timerElapsed++;
-    timerEl.textContent = formatTime(timerElapsed);
+    timerDisplay.textContent = formatTime(timerElapsed);
   }, 1000);
+  updateTimerUI();
 }
 
 function pauseTimer() {
@@ -100,12 +119,23 @@ function pauseTimer() {
   timerRunning = false;
   clearInterval(timerInterval);
   timerInterval = null;
+  updateTimerUI();
 }
 
 function stopTimer() {
   pauseTimer();
   timerStarted = true;
 }
+
+// Click the timer button to pause/resume
+timerBtn.addEventListener('click', () => {
+  if (!timerStarted || solved) return;
+  if (timerRunning) {
+    pauseTimer();
+  } else {
+    startTimer();
+  }
+});
 
 document.addEventListener('visibilitychange', () => {
   if (document.hidden) {
@@ -142,7 +172,7 @@ function restoreState() {
     cellState    = saved.cellState;
     timerElapsed = saved.elapsed ?? 0;
     solved       = saved.solved  ?? false;
-    timerEl.textContent = formatTime(timerElapsed);
+    timerDisplay.textContent = formatTime(timerElapsed);
     return true;
   } catch {
     return false;
@@ -153,10 +183,6 @@ function restoreState() {
 function renderGrid() {
   gridContainer.innerHTML = '';
   gridContainer.style.gridTemplateColumns = `repeat(${puzzle.width}, 1fr)`;
-
-  // Set a sensible width so cells are a reasonable size
-  const cellPx = Math.min(34, Math.floor(560 / puzzle.width));
-  gridContainer.style.width = `${cellPx * puzzle.width}px`;
 
   cellElements = Array.from({ length: puzzle.height }, () => Array(puzzle.width).fill(null));
 
@@ -391,7 +417,7 @@ function handleClueClick(dir, num) {
 function handleKeyDown(e) {
   if (!puzzle || solved) return;
   // Don't capture when a modal is open
-  if (winModal.classList.contains('open') || resetModal.classList.contains('open')) return;
+  if (winModal.classList.contains('open') || resetModal.classList.contains('open') || helpModal.classList.contains('open')) return;
   // Don't capture when menu is open (except Escape)
   if (menu.classList.contains('open') && e.key !== 'Escape') return;
 
@@ -445,6 +471,7 @@ function handleLetter(letter) {
 }
 
 function handleBackspace() {
+  if (!timerStarted) startTimer();
   const { row, col } = selection;
   if (playerGrid[row][col] !== '' && cellState[row][col] !== 'revealed') {
     playerGrid[row][col] = '';
@@ -638,7 +665,8 @@ function resetPuzzle() {
   timerElapsed = 0;
   timerStarted = false;
   pauseTimer();
-  timerEl.textContent = '00:00';
+  timerDisplay.textContent = '00:00';
+  updateTimerUI();
   updateAllCells();
   updateCompletedClues();
   saveState();
@@ -693,6 +721,11 @@ document.getElementById('menu-reset').addEventListener('click', () => {
 });
 
 // ── Modals ─────────────────────────────────────────────────────
+// Help modal
+helpBtn.addEventListener('click', () => helpModal.classList.add('open'));
+helpCloseBtn.addEventListener('click', () => helpModal.classList.remove('open'));
+helpModal.addEventListener('click', e => { if (e.target === helpModal) helpModal.classList.remove('open'); });
+
 winCloseBtn.addEventListener('click', () => winModal.classList.remove('open'));
 winModal.addEventListener('click', e => { if (e.target === winModal) winModal.classList.remove('open'); });
 
@@ -798,7 +831,9 @@ function initGame(puz) {
   timerStarted = false;
   timerRunning = false;
   if (timerInterval) clearInterval(timerInterval);
-  timerEl.textContent = '00:00';
+  timerInterval = null;
+  timerDisplay.textContent = '00:00';
+  updateTimerUI();
 
   // Build word order for Tab navigation
   buildWordOrder();
@@ -841,8 +876,10 @@ document.addEventListener('DOMContentLoaded', async () => {
   const params = new URLSearchParams(location.search);
   const embedMode = params.get('embed') === '1';
   const puzzleUrl = params.get('puz');
-  const puzzleType = params.get('type'); // 'dimi' | 'crossword'
-  const puzzleNum  = params.get('num');  // e.g. '139'
+  const puzzleType   = params.get('type');   // 'dimi' | 'crossword'
+  const puzzleNum    = params.get('num');    // e.g. '139'
+  const puzzleAuthor = params.get('author'); // e.g. 'Jane Smith'
+  const puzzlePubTitle = params.get('title'); // optional display title
 
   // Populate banner when type param is present
   if (puzzleType) {
@@ -852,6 +889,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     bannerLogo.src = logoSrc;
     bannerLogo.alt = typeName;
     if (puzzleNum) bannerNumber.textContent = `#${puzzleNum}`;
+    if (puzzlePubTitle || puzzleAuthor) {
+      bannerAuthor.textContent = [
+        puzzlePubTitle ? `"${puzzlePubTitle}"` : '',
+        puzzleAuthor ? `by ${puzzleAuthor}` : ''
+      ].filter(Boolean).join(' ');
+    }
     puzzleBanner.classList.add('visible');
   }
 
