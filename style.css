@@ -751,30 +751,37 @@ body.embed-mode #puzzle-title {
   display: none;
 }
 
+/* Embed mode: let content grow to its natural height so the parent can resize the iframe */
+body.embed-mode,
 body.embed-mode #app {
+  height: auto;
+  overflow: visible;
   border-radius: 8px;
-  overflow: hidden;
 }
 
 /* Always show side-by-side layout in embed mode, regardless of viewport width */
 body.embed-mode #puzzle-area {
   flex-direction: row;
-  overflow: hidden;
+  overflow: visible;
+  height: auto;
 }
 
 body.embed-mode #grid-wrapper {
   align-self: flex-start;
+  overflow: visible;
 }
 
 body.embed-mode #active-clue-bar {
   display: none;
 }
 
+/* Clue panel: fixed width, expand to show all clues without scrolling */
 body.embed-mode #clue-panel {
   flex: 0 0 280px;
   border-left: 1px solid #ccc;
   border-top: none;
-  min-height: unset;
+  overflow: visible;
+  height: auto;
 }
 
 body.embed-mode #clue-tabs {
@@ -783,7 +790,15 @@ body.embed-mode #clue-tabs {
 
 body.embed-mode #across-section,
 body.embed-mode #down-section {
-  display: flex;
+  display: block;
+  overflow: visible;
+  height: auto;
+  flex: none;
+}
+
+body.embed-mode .clue-list {
+  overflow: visible;
+  height: auto;
 }
 
 body.embed-mode .clue-section-header {
