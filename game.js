@@ -756,7 +756,9 @@ winCloseBtn.addEventListener('click', () => winModal.classList.remove('open'));
 winModal.addEventListener('click', e => { if (e.target === winModal) winModal.classList.remove('open'); });
 
 function getGamePageUrl() {
-  return 'https://stanforddaily.com/category/games/';
+  const type = new URLSearchParams(window.location.search).get('type');
+  if (type === 'dimi') return 'https://stanforddaily.com/category/games/daily-diminutive/';
+  return 'https://stanforddaily.com/category/games/full-sized-crossword/';
 }
 
 shareBtn.addEventListener('click', () => {
