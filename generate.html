@@ -304,23 +304,11 @@
       </div>
 
       <div class="field-group">
-        <label for="puzzle-title-input">Title</label>
-        <input type="text" id="puzzle-title-input" placeholder="e.g. Spring Cleaning" autocomplete="off">
-        <span class="field-hint">Shown before the author as "Spring Cleaning by Jane Smith". Leave blank to omit.</span>
-      </div>
-
-      <div class="field-group">
-        <label for="puzzle-author-input">Constructor <span class="required">*</span></label>
-        <input type="text" id="puzzle-author-input" placeholder="e.g. Jane Smith" autocomplete="off">
-        <span class="field-hint">Shown below the header as "by Jane Smith".</span>
-      </div>
-
-      <div class="field-group">
         <label for="puz-url-input">Puzzle file URL <span class="required">*</span></label>
         <input type="url" id="puz-url-input"
                placeholder="https://github.com/user/repo/blob/main/puzzles/2024-01-15.puz"
                autocomplete="off" spellcheck="false">
-        <span class="field-hint">Paste any GitHub URL — it will be converted to a raw link automatically.</span>
+        <span class="field-hint">Paste any GitHub URL — it will be converted to a raw link automatically. Title and constructor are read from the file.</span>
       </div>
 
       <div id="gen-error" role="alert" aria-live="polite"></div>
@@ -351,11 +339,9 @@
   <script type="module">
     import { parsePuz } from './puz-parser.js';
 
-    const puzUrlInput       = document.getElementById('puz-url-input');
-    const puzzleNumInput    = document.getElementById('puzzle-num-input');
-    const puzzleTitleInput  = document.getElementById('puzzle-title-input');
-    const puzzleAuthorInput = document.getElementById('puzzle-author-input');
-    const generateBtn       = document.getElementById('generate-btn');
+    const puzUrlInput    = document.getElementById('puz-url-input');
+    const puzzleNumInput = document.getElementById('puzzle-num-input');
+    const generateBtn    = document.getElementById('generate-btn');
     const outputArea     = document.getElementById('output-area');
     const outputTextarea = document.getElementById('output-textarea');
     const copyBtn        = document.getElementById('copy-btn');
@@ -371,12 +357,11 @@
       outputArea.classList.remove('visible');
 
       // Validate required fields
-      const puzzleNum     = puzzleNumInput.value.trim();
-      const puzzleAuthor  = puzzleAuthorInput.value.trim();
+      const puzzleNum = puzzleNumInput.value.trim();
       let rawUrl = puzUrlInput.value.trim();
 
-      if (!puzzleNum || !puzzleAuthor || !rawUrl) {
-        genError.textContent = 'Puzzle number, constructor, and puzzle file URL are required.';
+      if (!puzzleNum || !rawUrl) {
+        genError.textContent = 'Puzzle number and puzzle file URL are required.';
         return;
       }
 
@@ -399,8 +384,7 @@
         return;
       }
 
-      const puzzleType     = document.querySelector('input[name="puzzle-type"]:checked')?.value || 'dimi';
-      const puzzlePubTitle = puzzleTitleInput.value.trim();
+      const puzzleType = document.querySelector('input[name="puzzle-type"]:checked')?.value || 'dimi';
 
       generateBtn.disabled = true;
       generateBtn.textContent = 'Loading puzzle…';
@@ -419,38 +403,38 @@
           ? `Loaded: "${parsedTitle}"${parsedAuthor ? ` by ${parsedAuthor}` : ''}`
           : 'Loaded successfully.';
       } catch (err) {
-        // Fetch failed — generate snippet anyway, show a clear actionable message
         if (err.message.includes('Failed to fetch') || err.message.includes('NetworkError') || err.message.includes('CORS')) {
           genError.textContent = 'Could not fetch the file — make sure the URL points to a raw file (raw.githubusercontent.com), not a GitHub page.';
         } else {
           genError.textContent = `Could not load puzzle: ${err.message}`;
         }
-      } finally {
         generateBtn.disabled = false;
         generateBtn.textContent = 'Generate Embed Code';
+        return;
       }
 
+      generateBtn.disabled = false;
+      generateBtn.textContent = 'Generate Embed Code';
+
       const typeName    = puzzleType === 'dimi' ? 'Daily Diminutive' : 'Daily Crossword';
-      const footerLabel = puzzleNum ? `${typeName} #${puzzleNum}` : typeName;
+      const footerLabel = `${typeName} #${puzzleNum}`;
 
       const playerUrl = new URL(playerBase);
       playerUrl.searchParams.set('puz', rawUrl);
       playerUrl.searchParams.set('embed', '1');
       playerUrl.searchParams.set('type', puzzleType);
-      if (puzzleNum)      playerUrl.searchParams.set('num', puzzleNum);
-      if (puzzlePubTitle) playerUrl.searchParams.set('title', puzzlePubTitle);
-      if (puzzleAuthor)   playerUrl.searchParams.set('author', puzzleAuthor);
+      playerUrl.searchParams.set('num', puzzleNum);
+      if (parsedTitle)  playerUrl.searchParams.set('title', parsedTitle);
+      if (parsedAuthor) playerUrl.searchParams.set('author', parsedAuthor);
       const iframeSrc = playerUrl.toString();
 
-      const titleAttr = puzzleNum
-        ? `${footerLabel}`
-        : (parsedTitle ? `Crossword — ${parsedTitle}` : 'Crossword Puzzle');
+      const titleAttr = parsedTitle ? `${footerLabel} — ${parsedTitle}` : footerLabel;
 
       const snippet = `<div style="max-width:760px; margin:0 auto;">
   <iframe
     src="${iframeSrc}"
     width="100%"
-    height="600"
+    height="550"
     frameborder="0"
     scrolling="no"
     style="border:none; border-radius:8px; overflow:hidden; display:block;"
