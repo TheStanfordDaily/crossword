@@ -758,6 +758,42 @@ body.embed-mode #app {
   overflow: hidden;
 }
 
+/* Always show side-by-side layout in embed mode, regardless of viewport width */
+body.embed-mode #puzzle-area {
+  flex-direction: row;
+  overflow: hidden;
+}
+
+body.embed-mode #grid-wrapper {
+  flex: 1;
+  overflow: auto;
+  align-self: flex-start;
+}
+
+body.embed-mode #active-clue-bar {
+  display: none;
+}
+
+body.embed-mode #clue-panel {
+  flex: 0 0 280px;
+  border-left: 1px solid #ccc;
+  border-top: none;
+  min-height: unset;
+}
+
+body.embed-mode #clue-tabs {
+  display: none;
+}
+
+body.embed-mode #across-section,
+body.embed-mode #down-section {
+  display: flex !important;
+}
+
+body.embed-mode .clue-section-header {
+  display: block;
+}
+
 /* ── Media Queries (Mobile ≤ 640px) ─────────────────────────── */
 @media (max-width: 640px) {
   #puzzle-area {
