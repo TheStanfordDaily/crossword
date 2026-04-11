@@ -869,7 +869,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   if (puzzleUrl) {
     // Fetch and load puzzle directly, skip load screen
     try {
-      const puz = await loadFromUrl(decodeURIComponent(puzzleUrl));
+      const puz = await loadFromUrl(puzzleUrl);
       initGame(puz);
     } catch (err) {
       if (embedMode) {

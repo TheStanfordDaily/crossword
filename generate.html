@@ -296,9 +296,9 @@
       <div class="field-group">
         <label for="puz-url-input">Puzzle file URL</label>
         <input type="url" id="puz-url-input"
-               placeholder="https://raw.githubusercontent.com/user/repo/main/puzzles/2024-01-15.puz"
+               placeholder="https://github.com/user/repo/blob/main/puzzles/2024-01-15.puz"
                autocomplete="off" spellcheck="false">
-        <span class="field-hint">Must be a publicly accessible URL (CORS-enabled). Raw GitHub files and CDN assets work well.</span>
+        <span class="field-hint">Paste any GitHub URL — it will be converted to a raw link automatically.</span>
       </div>
 
       <div class="field-group">
@@ -345,29 +345,34 @@
     const genError       = document.getElementById('gen-error');
     const titlePreview   = document.getElementById('puzzle-title-preview');
 
-    // Derive base URL for the player app (same origin, index.html)
-    const baseUrl = (() => {
-      const url = new URL(location.href);
-      url.pathname = url.pathname.replace(/generate\.html$/, '');
-      url.search = '';
-      url.hash = '';
-      return url.toString();
-    })();
+    // Resolve index.html relative to this page — always correct regardless of host/path
+    const playerBase = new URL('index.html', location.href).href;
 
     generateBtn.addEventListener('click', async () => {
       genError.textContent = '';
       titlePreview.textContent = '';
       outputArea.classList.remove('visible');
 
-      const rawUrl = puzUrlInput.value.trim();
+      let rawUrl = puzUrlInput.value.trim();
       if (!rawUrl) {
         genError.textContent = 'Please enter a puzzle file URL.';
         return;
       }
 
-      let puzzleUrl;
+      // Auto-convert github.com blob URLs → raw.githubusercontent.com
+      // e.g. https://github.com/user/repo/blob/main/puzzles/file.puz
+      //    → https://raw.githubusercontent.com/user/repo/main/puzzles/file.puz
+      const githubBlobMatch = rawUrl.match(
+        /^https?:\/\/github\.com\/([^/]+)\/([^/]+)\/blob\/(.+)$/
+      );
+      if (githubBlobMatch) {
+        rawUrl = `https://raw.githubusercontent.com/${githubBlobMatch[1]}/${githubBlobMatch[2]}/${githubBlobMatch[3]}`;
+        puzUrlInput.value = rawUrl;
+        titlePreview.textContent = 'Converted to raw URL for direct access.';
+      }
+
       try {
-        puzzleUrl = new URL(rawUrl);
+        new URL(rawUrl);
       } catch {
         genError.textContent = 'Invalid URL. Please enter a full URL including https://.';
         return;
@@ -390,13 +395,13 @@
         const puz = parsePuz(buf);
         puzzleTitle  = puz.title  || '';
         puzzleAuthor = puz.author || '';
-        if (puzzleTitle) {
-          titlePreview.textContent = `Loaded: "${puzzleTitle}"${puzzleAuthor ? ` by ${puzzleAuthor}` : ''}`;
-        }
+        titlePreview.textContent = puzzleTitle
+          ? `Loaded: "${puzzleTitle}"${puzzleAuthor ? ` by ${puzzleAuthor}` : ''}`
+          : 'Loaded successfully.';
       } catch (err) {
-        // Fetch failed (likely CORS) — generate snippet anyway with a placeholder title
-        if (err.message.includes('Failed to fetch') || err.message.includes('NetworkError')) {
-          genError.textContent = 'Could not fetch puzzle (CORS restriction). The embed code was generated without a title — you can edit it manually.';
+        // Fetch failed — generate snippet anyway, show a clear actionable message
+        if (err.message.includes('Failed to fetch') || err.message.includes('NetworkError') || err.message.includes('CORS')) {
+          genError.textContent = 'Could not fetch the file — make sure the URL points to a raw file (raw.githubusercontent.com), not a GitHub page.';
         } else {
           genError.textContent = `Could not load puzzle: ${err.message}`;
         }
@@ -405,12 +410,15 @@
         generateBtn.textContent = 'Generate Embed Code';
       }
 
-      const encodedUrl  = encodeURIComponent(rawUrl);
       const typeName    = puzzleType === 'dimi' ? 'Daily Diminutive' : 'Daily Crossword';
       const footerLabel = puzzleNum ? `${typeName} #${puzzleNum}` : typeName;
 
-      let iframeSrc = `${baseUrl}?puz=${encodedUrl}&embed=1&type=${puzzleType}`;
-      if (puzzleNum) iframeSrc += `&num=${encodeURIComponent(puzzleNum)}`;
+      const playerUrl = new URL(playerBase);
+      playerUrl.searchParams.set('puz', rawUrl);
+      playerUrl.searchParams.set('embed', '1');
+      playerUrl.searchParams.set('type', puzzleType);
+      if (puzzleNum) playerUrl.searchParams.set('num', puzzleNum);
+      const iframeSrc = playerUrl.toString();
 
       const titleAttr = puzzleNum
         ? `${footerLabel}`
