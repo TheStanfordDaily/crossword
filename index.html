@@ -8,7 +8,7 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-<script>if (window.innerWidth <= 768) document.body.classList.add('is-mobile');</script>
+<script>if (window.matchMedia('(pointer: coarse)').matches) document.body.classList.add('is-mobile');</script>
 
   <!-- ── Load Screen ─────────────────────────────────────────── -->
   <div id="load-screen">

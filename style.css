@@ -17,6 +17,7 @@
   --incorrect:     #b91c1c;
   --revealed:      #8C1515;       /* cardinal for revealed letters */
   --checked-dot:   #8C1515;
+  --bg:            #f0e9de;       /* warm linen — matches Stanfordle */
   --gray-bg:       #f2eeee;       /* warm off-white */
   --panel-bg:      #fdf8f8;       /* barely-pink white */
   --clue-active-bg:#fde8e8;       /* matches active-word */
@@ -45,7 +46,15 @@ html, body {
 
 body {
   font-family: var(--sans);
-  background: var(--gray-bg);
+  background: var(--bg);
+  background-image:
+    repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 39px,
+      rgba(0,0,0,0.025) 39px,
+      rgba(0,0,0,0.025) 40px
+    );
   color: #1a1a1a;
   display: flex;
   flex-direction: column;
@@ -827,8 +836,8 @@ body.embed-mode #app {
   display: none;
 }
 
-/* ── Mobile Layout (≤ 768px or .is-mobile class set by JS) ─────── */
-@media (max-width: 768px) {
+/* ── Mobile Layout (touch devices — pointer: coarse) ───────────── */
+@media (pointer: coarse) {
   html {
     height: 100%;
     overflow: hidden;
@@ -844,6 +853,11 @@ body.embed-mode #app {
     height: 100vh;       /* fallback */
     height: 100dvh;
     overflow: hidden;
+  }
+
+  /* Hide header and banner — reclaim vertical space for the grid */
+  #puzzle-banner {
+    display: none !important;
   }
 
   /* Hide desktop clue panel — replaced by mobile nav + keyboard */
@@ -869,8 +883,9 @@ body.embed-mode #app {
     padding: 0;
     overflow: hidden;
     /* Size the wrapper to fit the grid: min of full-width vs height-available×(cols/rows).
-       --puzzle-cols / --puzzle-rows set by JS after puzzle loads. */
-    width: min(100%, calc((100dvh - 320px) * var(--puzzle-cols, 15) / var(--puzzle-rows, 15)));
+       --puzzle-cols / --puzzle-rows set by JS after puzzle loads.
+       On mobile the header (48px) and banner are hidden, freeing ~270px instead of ~320px. */
+    width: min(100%, calc((100dvh - 270px) * var(--puzzle-cols, 15) / var(--puzzle-rows, 15)));
   }
 
   #grid-container {
@@ -945,7 +960,7 @@ body.embed-mode #app {
     gap: 5px;
     padding: 6px 4px 8px;
     padding-bottom: calc(8px + env(safe-area-inset-bottom, 0px));
-    background: #d1d5db;
+    background: #c8bdb0;
     flex-shrink: 0;
   }
 
@@ -959,14 +974,14 @@ body.embed-mode #app {
     flex: 1;
     max-width: 36px;
     height: 42px;
-    background: #fff;
+    background: #e2d8cc;
     border: none;
-    border-radius: 5px;
-    box-shadow: 0 1px 0 rgba(0,0,0,0.35);
+    border-radius: 10px;
+    box-shadow: 0 2px 0 rgba(0,0,0,0.12);
     font-family: var(--sans);
     font-size: 0.9rem;
-    font-weight: 500;
-    color: #1a1a1a;
+    font-weight: 700;
+    color: #1e1b18;
     cursor: pointer;
     display: flex;
     align-items: center;
@@ -976,7 +991,7 @@ body.embed-mode #app {
   }
 
   .kb-key:active {
-    background: #b0b7bf;
+    background: #c8bdb0;
     box-shadow: none;
     transform: translateY(1px);
   }
@@ -984,17 +999,19 @@ body.embed-mode #app {
   .kb-back {
     max-width: 52px;
     font-size: 1.1rem;
-    background: #adb5bd;
-    color: #1a1a1a;
+    background: #c8bdb0;
+    color: #1e1b18;
   }
 
   .kb-back:active {
-    background: #8a9199;
+    background: #b5a99b;
   }
 }
 
-/* ── JS-class fallback (body.is-mobile added when window.innerWidth ≤ 768) ─ */
-/* Mirrors the critical visibility rules from the media query above            */
+/* ── JS-class fallback (body.is-mobile added when pointer: coarse) ─────────── */
+/* Mirrors the critical visibility rules from the media query above              */
+body.is-mobile #puzzle-banner { display: none !important; }
+
 body.is-mobile #clue-panel,
 body.is-mobile #active-clue-bar { display: none; }
 
@@ -1012,7 +1029,7 @@ body.is-mobile #grid-wrapper {
   flex: none;
   padding: 0;
   overflow: hidden;
-  width: min(100%, calc((100dvh - 320px) * var(--puzzle-cols, 15) / var(--puzzle-rows, 15)));
+  width: min(100%, calc((100dvh - 270px) * var(--puzzle-cols, 15) / var(--puzzle-rows, 15)));
 }
 
 body.is-mobile #grid-container {
@@ -1078,7 +1095,7 @@ body.is-mobile #mobile-keyboard {
   gap: 5px;
   padding: 6px 4px 8px;
   padding-bottom: calc(8px + env(safe-area-inset-bottom, 0px));
-  background: #d1d5db;
+  background: #c8bdb0;
   flex-shrink: 0;
 }
 
@@ -1092,14 +1109,14 @@ body.is-mobile .kb-key {
   flex: 1;
   max-width: 36px;
   height: 42px;
-  background: #fff;
+  background: #e2d8cc;
   border: none;
-  border-radius: 5px;
-  box-shadow: 0 1px 0 rgba(0,0,0,0.35);
+  border-radius: 10px;
+  box-shadow: 0 2px 0 rgba(0,0,0,0.12);
   font-family: var(--sans);
   font-size: 0.9rem;
-  font-weight: 500;
-  color: #1a1a1a;
+  font-weight: 700;
+  color: #1e1b18;
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -1111,5 +1128,5 @@ body.is-mobile .kb-key {
 body.is-mobile .kb-back {
   max-width: 52px;
   font-size: 1.1rem;
-  background: #adb5bd;
+  background: #c8bdb0;
 }

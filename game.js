@@ -10,11 +10,12 @@ import { parsePuz } from './puz-parser.js';
 // Belt-and-suspenders: CSS media query handles most cases;
 // this class-based fallback catches edge cases where the media
 // query misfires (e.g. Chrome "desktop site" mode, unusual viewport).
+const coarsePointer = window.matchMedia('(pointer: coarse)');
 function applyMobileClass() {
-  document.body.classList.toggle('is-mobile', window.innerWidth <= 768);
+  document.body.classList.toggle('is-mobile', coarsePointer.matches);
 }
 applyMobileClass();
-window.addEventListener('resize', applyMobileClass, { passive: true });
+coarsePointer.addEventListener('change', applyMobileClass);
 
 // ── DOM references ─────────────────────────────────────────────
 const loadScreen    = document.getElementById('load-screen');
@@ -756,13 +757,30 @@ winModal.addEventListener('click', e => { if (e.target === winModal) winModal.cl
 
 shareBtn.addEventListener('click', () => {
   const text = `I solved "${puzzle.title}"${puzzle.author ? ` by ${puzzle.author}` : ''} in ${formatTime(timerElapsed)}!`;
-  navigator.clipboard.writeText(text).then(() => {
+
+  function onCopied() {
     shareBtn.textContent = 'Copied!';
     setTimeout(() => { shareBtn.textContent = 'Share Result'; }, 2000);
-  }).catch(() => {
-    shareBtn.textContent = 'Copy failed';
-    setTimeout(() => { shareBtn.textContent = 'Share Result'; }, 2000);
-  });
+  }
+
+  function fallbackCopy() {
+    const el = document.createElement('textarea');
+    el.value = text;
+    el.setAttribute('readonly', '');
+    Object.assign(el.style, { position: 'fixed', opacity: '0' });
+    document.body.appendChild(el);
+    el.select();
+    el.setSelectionRange(0, el.value.length);
+    document.execCommand('copy');
+    el.remove();
+    onCopied();
+  }
+
+  if (navigator.clipboard && window.isSecureContext) {
+    navigator.clipboard.writeText(text).then(onCopied).catch(fallbackCopy);
+  } else {
+    fallbackCopy();
+  }
 });
 
 resetConfBtn.addEventListener('click', () => {
