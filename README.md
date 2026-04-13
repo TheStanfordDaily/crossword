@@ -15,7 +15,7 @@ How to upload a `.puz` file and embed a playable crossword in WordPress.
 3. Commit and push to `main`. GitHub Pages will publish it automatically within ~30 seconds.
 4. Your puzzle's public URL will be:
    ```
-   https://<your-username>.github.io/<repo-name>/puzzles/<filename>.puz
+   https://thestanforddaily.github.io/crossword/puzzles/<filename>.puz
    ```
    For example:
    ```
@@ -26,10 +26,7 @@ How to upload a `.puz` file and embed a playable crossword in WordPress.
 
 ## 2. Generate the embed code
 
-1. Open the embed generator:
-   ```
-   https://thestanforddaily.github.io/crossword/generate.html
-   ```
+1. Open the embed generator: [https://thestanforddaily.github.io/crossword/generate.html](https://thestanforddaily.github.io/crossword/generate.html)
 2. Paste your puzzle's public URL into the **Puzzle file URL** field.
 3. Select either "Daily Diminutive" or "Daily Crossword"
 4. Fill in the puzzle number
