@@ -209,6 +209,8 @@ function renderGrid() {
     for (let col = 0; col < puzzle.width; col++) {
       const div = document.createElement('div');
       div.className = 'cell';
+      if (col === puzzle.width - 1) div.classList.add('last-col');
+      if (row === puzzle.height - 1) div.classList.add('last-row');
       div.dataset.row = row;
       div.dataset.col = col;
 
