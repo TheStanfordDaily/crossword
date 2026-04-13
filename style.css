@@ -380,7 +380,7 @@ kbd {
   font-size: 0.5rem;
   color: var(--border-color);
   letter-spacing: 0.01em;
-  padding: 10px 0 14px 0;
+  padding: 10px 0 0 0;
   opacity: 0.6;
   width: 100%;
   text-align: right;
@@ -407,7 +407,8 @@ kbd {
 }
 
 /* Remove redundant right/bottom borders at grid edges */
-.cell:last-child { border-right: none; }
+.cell.last-col { border-right: none; }
+.cell.last-row { border-bottom: none; }
 
 .cell.black {
   background: var(--black-sq);
