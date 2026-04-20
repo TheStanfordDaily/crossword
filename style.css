@@ -235,6 +235,8 @@ body {
 #help-modal .modal {
   max-width: 460px;
   text-align: left;
+  max-height: 90vh;
+  overflow-y: auto;
 }
 
 #help-modal h2 {
