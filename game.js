@@ -768,7 +768,8 @@ function getGamePageUrl() {
 
 shareBtn.addEventListener('click', () => {
   const url = getGamePageUrl();
-  const text = `I solved "${puzzle.title}"${puzzle.author ? ` by ${puzzle.author}` : ''} in ${formatTime(timerElapsed)}!\n\n${url}`;
+  const author = puzzle.author?.trim();
+  const text = `I solved "${puzzle.title}"${author ? ` by ${author}` : ''} in ${formatTime(timerElapsed)}!\n\n${url}`;
 
   function onCopied() {
     shareBtn.textContent = 'Copied!';
