@@ -12,15 +12,8 @@ How to upload a `.puz` file and embed a playable crossword in WordPress.
    puzzles/2024-01-15.puz
    puzzles/dimi500.puz
    ```
-3. Commit and push to `main`. GitHub Pages will publish it automatically within ~30 seconds.
-4. Your puzzle's public URL will be:
-   ```
-   https://github.com/TheStanfordDaily/crossword/blob/main/puzzles/<filename>.puz
-   ```
-   For example:
-   ```
-   https://github.com/TheStanfordDaily/crossword/blob/main/puzzles/2024-01-15.puz
-   ```
+3. Commit and push to `main`.
+4. Locate your puzzle in the files: [https://github.com/TheStanfordDaily/crossword/tree/main](https://github.com/TheStanfordDaily/crossword/tree/main) -> click into the `puzzles/` folder-> click the `.puz` file that was just added -> copy the URL you’re on
 
 ---
 
