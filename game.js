@@ -919,6 +919,15 @@ function initGame(puz) {
   // Set puzzle title in header
   puzzleTitle.textContent = puzzle.title || 'Crossword';
 
+  // Update banner author line with title from puzzle file
+  if (puzzleBanner.classList.contains('visible')) {
+    const author = puzzle.author?.trim();
+    bannerAuthor.textContent = [
+      puzzle.title ? `"${puzzle.title}"` : '',
+      author ? `by ${author}` : ''
+    ].filter(Boolean).join(' ');
+  }
+
   // Show the app
   loadScreen.style.display = 'none';
   app.classList.add('visible');
@@ -942,8 +951,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   const puzzleUrl = params.get('puz');
   const puzzleType   = params.get('type');   // 'dimi' | 'crossword'
   const puzzleNum    = params.get('num');    // e.g. '139'
-  const puzzleAuthor = params.get('author'); // e.g. 'Jane Smith'
-  const puzzlePubTitle = params.get('title'); // optional display title
 
   // Populate banner when type param is present
   if (puzzleType) {
@@ -953,12 +960,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     bannerLogo.src = logoSrc;
     bannerLogo.alt = typeName;
     if (puzzleNum) bannerNumber.textContent = `#${puzzleNum}`;
-    if (puzzlePubTitle || puzzleAuthor) {
-      bannerAuthor.textContent = [
-        puzzlePubTitle ? `"${puzzlePubTitle}"` : '',
-        puzzleAuthor ? `by ${puzzleAuthor}` : ''
-      ].filter(Boolean).join(' ');
-    }
     puzzleBanner.classList.add('visible');
   }
 
