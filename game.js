@@ -518,17 +518,15 @@ function advanceInWord() {
   const cells = getCellsInWord(dir, num);
   const idx = cells.findIndex(([r, c]) => r === row && c === col);
 
-  // Find next empty cell in the word
+  // Find next empty cell in the word, skipping already-filled cells
   for (let i = idx + 1; i < cells.length; i++) {
     const [r, c] = cells[i];
-    if (playerGrid[r][c] === '' || cellState[r][c] !== 'revealed') {
+    if (playerGrid[r][c] === '') {
       setSelection(r, c, dir);
       return;
     }
   }
-  // No empty cell found — advance to next word's first empty or first cell
-  // (Optional behavior: stay at end of word if all filled)
-  // NYT convention: stop at end
+  // No empty cell ahead — NYT convention: stay at current position
 }
 
 function retreatInWord() {
